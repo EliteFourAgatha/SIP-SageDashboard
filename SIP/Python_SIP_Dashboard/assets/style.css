@@ -1,0 +1,25 @@
+/*Asterisk is universal, affects all elements*/
+* {
+    box-sizing: border-box;
+}
+
+.column {
+    /*float used to position element*/
+    float: left;
+    padding: 10px;
+}
+.left {
+    width: 30%;
+    background-color: lightblue;
+    text-align: center;
+}
+.right {
+    width: 70%;
+    background-color: rgb(126, 191, 212);
+    text-align: center;
+}
+.row:after {
+    content:"";
+    display: table;
+    clear: both;
+}
