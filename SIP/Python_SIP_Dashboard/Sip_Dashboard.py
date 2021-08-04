@@ -17,18 +17,29 @@ import websocket
 import twelvedata
 from twelvedata import TDClient
 
+# Maybe unnecessary section, trying things
 #Initialize Dash App
 app = dash.Dash(__name__)
 
 #Initialize TD Client
 tdc = TDClient(apikey='e691e3652b094ceeaae6d74239ea6cf9')
 
-ts = tdc.time_series(
-    symbol="AAPL",
-    interval="1min", #Timeline to search for. Minutes? Days? Months?
-    outputsize=10,
-    timezone="America/New_York"
-)
+## TD Timeseries 
+# ts = tdc.time_series(
+    # symbol="AAPL",
+    # interval="1min", #Timeline to search for. Minutes? Days? Months?
+    # outputsize=10,
+    #timezone="America/New_York"
+# )
+# dataframe = ts.as_pandas()
+
+# figure = dataframe.plot()
+
+#ralphPrice = https://api.twelvedata.com/price?symbol=AAPL&apikey=apikey
+
+#def get_stock_report(symbol):
+
+#//End maybe unncessary section
 
 # Move all of these functions to separate file. Just here to start building functionality.
 
@@ -40,49 +51,40 @@ def get_stock_options(list_stocks):
         dict_list.append({'label': i, 'value': i})
     return dict_list
 
-#def get_stock_report(symbol):
+# df = pd.read_csv('data/Nasdaq_Name&Symbol.csv', index_col=0)
+# print(df["Symbol"][0])
 
-#gt.save_tickers(NASDAQ=True, NYSE=True, filename='tickerList.csv')
-tickers = gt.get_tickers()
-print(tickers)
+df = pd.read_csv('data/stockdata2.csv', index_col=0, parse_dates=True)
+df.index = pd.to_datetime(df['Date'])
 
-dataframe = ts.as_pandas()
-
-figure = dataframe.plot()
-
-#ralphPrice = https://api.twelvedata.com/price?symbol=AAPL&apikey=apikey
-
-#ralph = ralph.as_pandas()
-
-#print(ralph)
-
-#print("current price:" + ralphPrice)
-
-# app.layout = html.Div(children=[
+app.layout = html.Div(children=[
                         # Define row element
-                        # html.Div(className='row',
-                        #children=[
-                            #html.Div(className='dropdown column',
-                            #children=[
-                                #html.H2('Stock Dashboard'),
-                                #html.P('Pick one or more stocks from the dropdown below'),
-                                #dcc.Dropdown(id='stockdropdown',
-                                            #options=get_stock_options(dataframe['symbol'].unique()),
-                                            #multi=True,
-                                            #value=[dataframe['stock'].sort_values()[0]],
-                                            #style={'backgroundColor': '#1E1E1E'},
-                                            #className='stockdropdown')
-                                    #]),
-                            #html.Div(className='data visualization column',
-                            #children=[
-                                #fig.show(),
-                                #html.H2('Data Visualization'),
+                        html.Div(className='row',
+                        children=[
+                            html.Div(className='dropdown column',
+                            children=[
+                                html.H2('Stock Dashboard'),
+                                html.P('Pick one or more stocks from the dropdown below'),
+                                dcc.Dropdown(id='stockdropdown',
+                                            # Options are all possible selections in dropdown.
+                                            # Supplying all (unique) stock symbols as options
+                                            options=get_stock_options(df['stock'].unique()),
+                                            # Can the user select more than one stock at a time?
+                                            # Currently false. Search for 1 stock and populate data
+                                            multi=False,
+                                            value=[df['stock'].sort_values()[0]],
+                                            style={'backgroundColor': '#1E1E1E'},
+                                            className='stockdropdown')
+                                    ]),
+                            html.Div(className='data visualization column',
+                            children=[
+                                html.H2('Data Visualization'),
                                 #dcc.Graph(id='timeseriesgraph',
                                         #config={'displayModeBar': False},
                                         #animate=True)
-                                    #])
-                                #])
-                            #])
+                                    ])
+                                ])
+                            ])
 
 # **Callbacks are how you add interactivity between components
 #  Called whenever user selects a stock from dropdown

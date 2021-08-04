@@ -3,6 +3,11 @@
     box-sizing: border-box;
 }
 
+p, h2{
+    width: 100%;
+    text-align: center;
+}
+
 .column {
     /*float used to position element*/
     float: left;
