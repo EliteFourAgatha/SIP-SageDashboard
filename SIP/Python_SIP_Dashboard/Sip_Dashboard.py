@@ -2,14 +2,14 @@ import dash
 import dash_core_components as dcc
 import dash_html_components as html
 from dash.dependencies import Input, Output, State
-
 import pandas as pd
 import plotly.graph_objects as pgo
-import plotly.express as px
-# pd.options.plotting.backend = "plotly"
+from datetime import datetime
 
 import yfinance as yf
-import shutil, os
+import os
+
+from Sip_Layout import *
 
 
 import websocket
@@ -17,29 +17,15 @@ import websocket
 import twelvedata
 from twelvedata import TDClient
 
-# Maybe unnecessary section, trying things
+
 #Initialize Dash App
 app = dash.Dash(__name__)
+app.config.suppress_callback_exceptions = True
 
 #Initialize TD Client
-tdc = TDClient(apikey='e691e3652b094ceeaae6d74239ea6cf9')
+# tdc = TDClient(apikey='e691e3652b094ceeaae6d74239ea6cf9')
 
-## TD Timeseries 
-# ts = tdc.time_series(
-    # symbol="AAPL",
-    # interval="1min", #Timeline to search for. Minutes? Days? Months?
-    # outputsize=10,
-    #timezone="America/New_York"
-# )
 # dataframe = ts.as_pandas()
-
-# figure = dataframe.plot()
-
-#ralphPrice = https://api.twelvedata.com/price?symbol=AAPL&apikey=apikey
-
-#def get_stock_report(symbol):
-
-#//End maybe unncessary section
 
 # Move all of these functions to separate file. Just here to start building functionality.
 
@@ -51,12 +37,15 @@ def get_stock_options(list_stocks):
         dict_list.append({'label': i, 'value': i})
     return dict_list
 
+# Load stock data
+
 # df = pd.read_csv('data/Nasdaq_Name&Symbol.csv', index_col=0)
 # print(df["Symbol"][0])
 
 df = pd.read_csv('data/stockdata2.csv', index_col=0, parse_dates=True)
 df.index = pd.to_datetime(df['Date'])
 
+# App layout
 app.layout = html.Div(children=[
                         # Define row element
                         html.Div(className='row',
@@ -65,7 +54,7 @@ app.layout = html.Div(children=[
                             children=[
                                 html.H2('Stock Dashboard'),
                                 html.P('Pick one or more stocks from the dropdown below'),
-                                dcc.Dropdown(id='stockdropdown',
+                                dcc.Dropdown(id='stock-dropdown',
                                             # Options are all possible selections in dropdown.
                                             # Supplying all (unique) stock symbols as options
                                             options=get_stock_options(df['stock'].unique()),
@@ -74,28 +63,52 @@ app.layout = html.Div(children=[
                                             multi=False,
                                             value=[df['stock'].sort_values()[0]],
                                             style={'backgroundColor': '#1E1E1E'},
-                                            className='stockdropdown')
+                                            className='stock-dropdown')
                                     ]),
                             html.Div(className='data visualization column',
                             children=[
                                 html.H2('Data Visualization'),
-                                #dcc.Graph(id='timeseriesgraph',
-                                        #config={'displayModeBar': False},
-                                        #animate=True)
+                                dcc.Graph(id='timeseries-graph',
+                                        config={'displayModeBar': False},
+                                        animate=True)
                                     ])
                                 ])
                             ])
 
-# **Callbacks are how you add interactivity between components
+# **Callbacks add interactivity between components
 #  Called whenever user selects a stock from dropdown
 #  It takes the selected dropdown value
-# @app.callback(Output('timeseriesgraph','figure'), # (ID of output component, property of output component)
-                # [Input('stockdropdown','value')]) # (ID of input component, property of input component)
+@app.callback(Output('timeseries-graph','figure'), # (ID of output component, property of output component)
+                [Input('stock-dropdown','value')]) # (ID of input component, property of input component)
 
-# def update_timeseries(selected_dropdown_value):
-    # trace = []
-    # dataframeVar = dataframe
-
+def update_timeseries(selected_dropdown_value):
+    # If x clicked in dropdown & no stock selected. Avoids callback error
+    if selected_dropdown_value is None:
+        selected_dropdown_value = df['stock'][0]
+    trace1 = []
+    dataFrame = df
+    for stock in selected_dropdown_value:
+        trace1.append(pgo.Scatter(x=dataFrame[dataFrame['stock'] == stock].index,
+                                y = dataFrame[dataFrame['stock'] == stock]['value'],
+                                mode='lines',
+                                opacity=0.7,
+                                name=stock,
+                                textposition='bottom center'))
+    traces = [trace1]
+    data = [val for sublist in traces for val in sublist]
+    figure = {'data': data,
+              'layout': pgo.Layout(
+                  template='plotly_dark',
+                  margin={'b': 15},
+                  hovermode='x',
+                  autosize=True,
+                  title={'text': 'stock price', 'font': {'color': 'white'}, 'x': 0.5},
+                  xaxis={'range': [dataFrame.index.min(), dataFrame.index.max()]},
+              ),
+            }
+    
+    return figure
+ 
 if __name__ == '__main__':
     app.run_server(debug=True)
 
