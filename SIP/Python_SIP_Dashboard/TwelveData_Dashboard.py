@@ -4,11 +4,13 @@ import dash_html_components as html
 import dash_bootstrap_components as dbc
 from dash.dependencies import Input, Output, State
 import pandas as pd
-from pandas import json_normalize
 import plotly.graph_objects as pgo
-import requests
-import json
+import matplotlib
+import mplfinance
 from datetime import datetime
+
+import twelvedata
+from twelvedata import TDClient
 
 from Info_Layout import *
 from Graph_Layout import *
@@ -17,11 +19,8 @@ from Stock_Functions import *
 #Initialize Dash App
 app = dash.Dash(__name__, external_stylesheets=[dbc.themes.DARKLY])
 
-api_key = "BPE6KMKXLWCGGQW1"
-api_url = "https://www.alphavantage.co/query?function="
-
-# df = pd.read_csv('data/stockdata2.csv', index_col=0, parse_dates=True)
-# df.index = pd.to_datetime(df['Date'])
+api_key = "e691e3652b094ceeaae6d74239ea6cf9"
+td = TDClient(apikey=api_key)
 
 # App layout
 app.layout = html.Div(children=[
@@ -65,57 +64,26 @@ app.layout = html.Div(children=[
                 #Output('basic-info-table', 'children'), # Basic info like industry etc.
                 #Output('basic-info-table', 'columns'),
                 # Output('error-message', 'children'), # (Fill in which here____) Error Message
-                #Output('main-graph', 'figure'), # Price chart figure
+                Output('main-graph', 'figure'), # Price chart figure
                 [Input('ticker-input-button', 'n_clicks')],
                 [State('ticker-input-searchbar', 'value')])
 
 #Callback function. Takes inputs (in order), must return all outputs.
-# Function is called whenever ANY included inputs are changed
-#  State allows you to pass along extra values without firing the callback function
-#   So this function is only called when the input (button) is pressed
 def return_stock_graph(n_clicks, ticker):
     
-    #try:
-    #Intraday call to populate graph
-    stock_intraday = requests.get(api_url + "TIME_SERIES_INTRADAY&interval=15min&symbol=" + ticker + "&apikey=" + api_key)
-    price_data = stock_intraday.json()#Maybe redundant, might be able return data in json form already
-    
-
-    #Company Overview call to populate table and headers
-    stock_overview = requests.get(api_url + "OVERVIEW&symbol=" + ticker + "&apikey=" + api_key)
-    overview_json = stock_overview.json()#Maybe redundant, might be able return data in json form already
-
-    stock_name = overview_json.get('Name')
+    ts = td.time_series(
+        symbol=ticker,
+        outputsize=75,
+        interval="1day"
+    )
+    fig = ts.as_pyplot_figure()
+    stock_name = "Name: " + ticker
     stock_ticker = ticker
-    stock_price = price_data.get(['Time Series (15min)'][0][('4. Close')])
-    stock_pe_ratio = overview_json.get('PERatio')
-
-    #fig = return_candlestick(price_data)
-    #fig = pgo.Figure(data=[pgo.Scatter(x=[], y=[])])
-        
-    #except:
-        #fig = pgo.Figure(data=[pgo.Scatter(x=[], y=[])])
-        #return 'Sorry! Company Not Available', 'No ticker', fig
-        #stock_name = 'idkman'
-        #stock_ticker = 'unknownticker'
+    stock_price = "Price: $0.00"
+    stock_pe_ratio = "PERatio: 00"
 
     #Return these values to output, in order
-    return stock_name, stock_ticker, stock_price, stock_pe_ratio
-
-    # Example except block from tutorial, returns 10 different values to outputs
-    #   in callback. Try to figure out error message. Does it pop up? How would you do that?
-    # except:
-        # return 'Sorry! Company Not Available', '#######', '$##.##', '##.##', \
-		        # {'width':'20%', 'display':'inline-block'}, '##.##%', \
-		        # {'width':'20%', 'display':'inline-block'}, \
-		        # 'Error! Please try again another Company.', {'data':None}, None
-                    
-    #Global lightweight call for current price and % change
-    #
-    #stock_global = requests.get(api_url + "GLOBAL_QUOTE&symbol=" + ticker + "&apikey=" + api_key)
-    #global_json = stock_global.json() #Maybe redundant, might be able return data in json form already
-    #stock_price = global_json.get('05. price')
-    #percent_change = global_json.get('10. change percent')
+    return stock_name, stock_ticker, stock_price, stock_pe_ratio, fig
 
 
     

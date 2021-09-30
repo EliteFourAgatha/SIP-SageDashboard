@@ -46,8 +46,4 @@ def return_table_graph_layout():
                 html.Div(return_graph(),
                     style={'width': '70%', 'display': 'inline-block', 'vertical-align':'top'})
     ])
-
-def return_moving_average(stock):
-    df = stock.history(period='2y')
-    df = df.reset_index()[['Date', 'Open', 'Low', 'High', 'Close']]
      
