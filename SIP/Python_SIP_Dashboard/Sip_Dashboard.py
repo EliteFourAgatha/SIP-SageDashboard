@@ -1,17 +1,22 @@
+import matplotlib.pyplot as plt
+import pandas as pd
+import numpy as np
+from pandas import json_normalize
+import requests
+import json
+import alpha_vantage
+from alpha_vantage.timeseries import TimeSeries
+import matplotlib.pyplot as plt
 import dash
 import dash_core_components as dcc
 import dash_html_components as html
 import dash_bootstrap_components as dbc
 from dash.dependencies import Input, Output, State
-import pandas as pd
-from pandas import json_normalize
 import plotly.graph_objects as pgo
-import requests
-import json
-from datetime import datetime
+import datetime
+import mplfinance
 
-from Info_Layout import *
-from Graph_Layout import *
+from Dashboard_Layout import *
 from Stock_Functions import *
 
 #Initialize Dash App
@@ -20,8 +25,6 @@ app = dash.Dash(__name__, external_stylesheets=[dbc.themes.DARKLY])
 api_key = "BPE6KMKXLWCGGQW1"
 api_url = "https://www.alphavantage.co/query?function="
 
-# df = pd.read_csv('data/stockdata2.csv', index_col=0, parse_dates=True)
-# df.index = pd.to_datetime(df['Date'])
 
 # App layout
 app.layout = html.Div(children=[
@@ -77,22 +80,24 @@ def return_stock_graph(n_clicks, ticker):
     
     #try:
     #Intraday call to populate graph
-    stock_intraday = requests.get(api_url + "TIME_SERIES_INTRADAY&interval=15min&symbol=" + ticker + "&apikey=" + api_key)
-    price_data = stock_intraday.json()#Maybe redundant, might be able return data in json form already
+    intraday_response = requests.get(api_url + "TIME_SERIES_INTRADAY&interval=15min&symbol=" + ticker + "&apikey=" + api_key)
+    price_data = intraday_response.json()#Maybe redundant, might be able return data in json form already
     
-
     #Company Overview call to populate table and headers
-    stock_overview = requests.get(api_url + "OVERVIEW&symbol=" + ticker + "&apikey=" + api_key)
-    overview_json = stock_overview.json()#Maybe redundant, might be able return data in json form already
+    overview_response = requests.get(api_url + "OVERVIEW&symbol=" + ticker + "&apikey=" + api_key)
+    overview_json = overview_response.json()#Maybe redundant, might be able return data in json form already
 
     stock_name = overview_json.get('Name')
-    stock_ticker = ticker
-    stock_price = price_data.get(['Time Series (15min)'][0][('4. Close')])
     stock_pe_ratio = overview_json.get('PERatio')
+    stock_ticker = ticker
+    #stock_price = price_data.get(['Time Series (15min)'][0][('4. Close')])
+    stock_price = 'current_stock_price'
 
-    #fig = return_candlestick(price_data)
-    #fig = pgo.Figure(data=[pgo.Scatter(x=[], y=[])])
-        
+    fig = pgo.Figure(data=[
+                        pgo.Line(x=df['time'],
+                        y=df['close'])])
+
+
     #except:
         #fig = pgo.Figure(data=[pgo.Scatter(x=[], y=[])])
         #return 'Sorry! Company Not Available', 'No ticker', fig
@@ -100,15 +105,7 @@ def return_stock_graph(n_clicks, ticker):
         #stock_ticker = 'unknownticker'
 
     #Return these values to output, in order
-    return stock_name, stock_ticker, stock_price, stock_pe_ratio
-
-    # Example except block from tutorial, returns 10 different values to outputs
-    #   in callback. Try to figure out error message. Does it pop up? How would you do that?
-    # except:
-        # return 'Sorry! Company Not Available', '#######', '$##.##', '##.##', \
-		        # {'width':'20%', 'display':'inline-block'}, '##.##%', \
-		        # {'width':'20%', 'display':'inline-block'}, \
-		        # 'Error! Please try again another Company.', {'data':None}, None
+    return stock_name, stock_ticker, stock_price, stock_pe_ratio, fig
                     
     #Global lightweight call for current price and % change
     #

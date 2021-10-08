@@ -170,6 +170,7 @@ Taken from https://codepen.io/chriddyp/pen/bWLwgP.css
     line-height: 1.2;
     letter-spacing: -.1rem;
     margin-bottom: 2rem;
+    text-align: center;
   }
   h2 {
     font-size: 3.6rem;
