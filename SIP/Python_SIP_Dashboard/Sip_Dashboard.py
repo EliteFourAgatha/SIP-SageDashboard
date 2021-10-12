@@ -13,6 +13,9 @@ import dash_html_components as html
 import dash_bootstrap_components as dbc
 from dash.dependencies import Input, Output, State
 import plotly.graph_objects as pgo
+
+import plotly.express as px
+
 import datetime
 import mplfinance
 
@@ -68,21 +71,18 @@ app.layout = html.Div(children=[
                 #Output('basic-info-table', 'children'), # Basic info like industry etc.
                 #Output('basic-info-table', 'columns'),
                 # Output('error-message', 'children'), # (Fill in which here____) Error Message
-                #Output('main-graph', 'figure'), # Price chart figure
+                Output('main-graph', 'figure'), # Price chart figure
                 [Input('ticker-input-button', 'n_clicks')],
+                [Input('time-interval-radio', 'value')],
                 [State('ticker-input-searchbar', 'value')])
 
 #Callback function. Takes inputs (in order), must return all outputs.
 # Function is called whenever ANY included inputs are changed
 #  State allows you to pass along extra values without firing the callback function
 #   So this function is only called when the input (button) is pressed
-def return_stock_graph(n_clicks, ticker):
+def return_stock_graph(n_clicks, timeChoice, ticker):
     
     #try:
-    #Intraday call to populate graph
-    intraday_response = requests.get(api_url + "TIME_SERIES_INTRADAY&interval=15min&symbol=" + ticker + "&apikey=" + api_key)
-    price_data = intraday_response.json()#Maybe redundant, might be able return data in json form already
-    
     #Company Overview call to populate table and headers
     overview_response = requests.get(api_url + "OVERVIEW&symbol=" + ticker + "&apikey=" + api_key)
     overview_json = overview_response.json()#Maybe redundant, might be able return data in json form already
@@ -90,19 +90,33 @@ def return_stock_graph(n_clicks, ticker):
     stock_name = overview_json.get('Name')
     stock_pe_ratio = overview_json.get('PERatio')
     stock_ticker = ticker
+    #Return basic info table here
+
+    #Intraday call to populate graph
+    #intraday_response = requests.get(api_url + "TIME_SERIES_INTRADAY&interval=15min&symbol=" + ticker + "&apikey=" + api_key)
+    #price_data = intraday_response.json()#Maybe redundant, might be able return data in json form already
+    if timeChoice == '1mo':
+        #Do alpha vantage api call here for most recent month (year1month1 slice)
+        ts = TimeSeries(key=api_key, output_format='csv')
+        data = ts.get_intraday_extended(symbol=ticker,interval='15min',slice='year1month1')
+        
+        #csv --> dataframe
+        df = pd.DataFrame(list(data[0]))
+        #set index column name
+        df.index.name = 'date'
+        stock_name = 'success_name1'
+        
+        #
+        #Use matplotlib/plotly/better than plotly express for this
+
+        fig = px.line(data_frame=df, x=0, y=4)
+        #fig.update_layout(yaxis_tickprefix='$', yaxis_tickformat=',.2f')
+    else:
+        stock_name = 'error1'
+        fig = pgo.Figure(data=[])
+
     #stock_price = price_data.get(['Time Series (15min)'][0][('4. Close')])
     stock_price = 'current_stock_price'
-
-    fig = pgo.Figure(data=[
-                        pgo.Line(x=df['time'],
-                        y=df['close'])])
-
-
-    #except:
-        #fig = pgo.Figure(data=[pgo.Scatter(x=[], y=[])])
-        #return 'Sorry! Company Not Available', 'No ticker', fig
-        #stock_name = 'idkman'
-        #stock_ticker = 'unknownticker'
 
     #Return these values to output, in order
     return stock_name, stock_ticker, stock_price, stock_pe_ratio, fig
