@@ -28,18 +28,15 @@ def return_input_bar():
                     ], style={'width':'30%', 'display': 'inline-block'})
         ])
 
-# Returns layout for basic stats (industry, sector, etc.)
-# (Consider changing this to being more tabs/cards. Depends if this info needs explanation or not)
+# Returns table for company profile
 def return_table():
-    return html.Div([html.Br(), html.Br(), html.Table(id='basic-info-table')
-                                                    #columns=[
-                                                        #{'name': 'Column1', 'id': 'column1'},
-                                                        #{'name': 'Column2', 'id': 'column2'},
-                                                        #{'name': 'Column3', 'id': 'column3'},
-                                                        #{'name': 'Column4', 'id': 'column4'},
-
-                                                    #])
-                                                    ])
+    return html.Table(title='Company Profile', id='basic-info-table',
+                        children=[
+                            #Tr defines a row in table
+                            html.Tr([html.Td('Sector:  '), html.Td(id='table-sector')]),
+                            html.Tr([html.Td('Industry:  '), html.Td(id='table-industry')])
+                        ])
+                                                    
 
 # Generate Cards and Graphs #
 
@@ -77,15 +74,3 @@ def return_graph():
         dcc.Graph(id='main-graph')
     ])
     return layout
-
-# Returns table and graph in same row. (Refer to reference image)
-# (Change this later to different layout that makes more sense)
-# *Graph on right side, radio buttons under it, maybe small table of basic info under that?*
-# Also, would help if this wasn't exact copy of reference tutorial. Mix it up a bit.
-def return_table_graph_layout():
-    return html.Div([
-                html.Div(return_table(),
-                    style={'width': '30%', 'display':'inline-block', 'vertical-align':'top'}),
-                html.Div(return_graph(),
-                    style={'width': '70%', 'display': 'inline-block', 'vertical-align':'top'})
-    ])

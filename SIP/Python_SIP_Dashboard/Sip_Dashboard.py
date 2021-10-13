@@ -30,48 +30,41 @@ api_url = "https://www.alphavantage.co/query?function="
 
 
 # App layout
-app.layout = html.Div(children=[
-                        html.Div(className='main header',
-                        children=[
-                            html.H2('Stock Dashboard', style={'color':'white'}),
-                            html.P('Descriptive Subtitle', style={'color':'white'})
-                        ],
-                        style={'width':'100%','margin':'auto'}),
-                        html.Div(return_input_bar(),
-                                    style={'width':'100%', 'margin':'auto'}
-                        ),
-                        dbc.Row([
-                            dbc.Col(html.H3(id='stock-name')),
-                            dbc.Col(html.H3(id='stock-price'))
-                        ]),
-                        dbc.Row([
-                            dbc.Col(html.H3(id='stock-ticker')),
-                            dbc.Col(html.H3(id='stock-PE-ratio'))
-                        ]),
-                        # Start of div for 2 column layout
-                        html.Div(className='row',
-                        children=[
-                            dbc.Col(html.Div("Column 1")),
-                            html.Div(className='data visualization column',
-                            children=[
-                                html.H2('Data Visualization'),
-                                return_table_graph_layout(),
-                                #dcc.Graph(id='main-graph',
-                                        #config={'displayModeBar': False},
-                                        #animate=True)
-                                ])
-                            ])
-                        ])
+app.layout = html.Div(
+    [
+       dbc.Row(dbc.Col(html.H1('Stock Dashboard', style={'text-align':'center'}))),
+       dbc.Row(dbc.Col(html.Div(return_input_bar(), style={'margin':'auto'}))),
+       dbc.Row(
+           [
+               dbc.Col(html.H3(id='stock-name'), width=3),
+               dbc.Col(html.H3(id='stock-ticker'), width=3),
+               dbc.Col(html.H3(id='stock-price'), width=3),
+               dbc.Col(html.H3(id='stock-pe-ratio'), width=3)
+           ]
+       ),
+       dbc.Row(
+           [
+               dbc.Col(return_table(), width=4),
+               dbc.Col(
+                   [
+                        return_timeinterval(),
+                        dcc.Graph(id='stock-graph'),
+                   ],
+                   width=8)
+           ]
+       )
+    ])           
 
 #Callback for stock price and graph
 @app.callback(Output('stock-name', 'children'), # Stock Name
                 Output('stock-ticker', 'children'), # Stock Ticker
                 Output('stock-price', 'children'), # Current Stock Price
-                Output('stock-PE-ratio', 'children'),
+                Output('stock-pe-ratio', 'children'),
                 #Output('basic-info-table', 'children'), # Basic info like industry etc.
-                #Output('basic-info-table', 'columns'),
+                Output('table-sector', 'children'),
+                Output('table-industry', 'children'),
                 # Output('error-message', 'children'), # (Fill in which here____) Error Message
-                Output('main-graph', 'figure'), # Price chart figure
+                Output('stock-graph', 'figure'), # Price chart figure
                 [Input('ticker-input-button', 'n_clicks')],
                 [Input('time-interval-radio', 'value')],
                 [State('ticker-input-searchbar', 'value')])
@@ -91,6 +84,8 @@ def return_stock_graph(n_clicks, timeChoice, ticker):
     stock_pe_ratio = overview_json.get('PERatio')
     stock_ticker = ticker
     #Return basic info table here
+    table_sector = overview_json.get('Sector')
+    table_industry = overview_json.get('Industry')
 
     #Intraday call to populate graph
     #intraday_response = requests.get(api_url + "TIME_SERIES_INTRADAY&interval=15min&symbol=" + ticker + "&apikey=" + api_key)
@@ -104,7 +99,6 @@ def return_stock_graph(n_clicks, timeChoice, ticker):
         df = pd.DataFrame(list(data[0]))
         #set index column name
         df.index.name = 'date'
-        stock_name = 'success_name1'
         
         #
         #Use matplotlib/plotly/better than plotly express for this
@@ -119,7 +113,8 @@ def return_stock_graph(n_clicks, timeChoice, ticker):
     stock_price = 'current_stock_price'
 
     #Return these values to output, in order
-    return stock_name, stock_ticker, stock_price, stock_pe_ratio, fig
+    return stock_name, stock_ticker, stock_price, stock_pe_ratio, table_sector, \
+            table_industry, fig
                     
     #Global lightweight call for current price and % change
     #
@@ -127,13 +122,6 @@ def return_stock_graph(n_clicks, timeChoice, ticker):
     #global_json = stock_global.json() #Maybe redundant, might be able return data in json form already
     #stock_price = global_json.get('05. price')
     #percent_change = global_json.get('10. change percent')
-
-
-    
-#Callback to return candlestick chart if change graph button pressed
-# Make sure to set graphtype variable to candlestick
-# @app.callback([Output('main-graph', 'figure')],
-                # [Input('candlestick-button')]
 
 #
 #Callback to return different time period on graph from radio buttons
