@@ -83,9 +83,21 @@ def return_stock_graph(n_clicks, timeChoice, ticker):
     stock_name = overview_json.get('Name')
     stock_pe_ratio = overview_json.get('PERatio')
     stock_ticker = ticker
+    stock_ebitda = overview_json.get('EBITDA')
+    stock_dividend_yield = overview_json.get('DividendYield')
+
+    #
     #Return basic info table here
+    #
     table_sector = overview_json.get('Sector')
     table_industry = overview_json.get('Industry')
+
+    #Make this green
+    table_yearly_high = overview_json.get('52WeekHigh')
+
+    #Make this red
+    table_yearly_low = overview_json.get('52WeekLow')
+    table_target_price = overview_json.get('AnalystTargetPrice')
 
     #Intraday call to populate graph
     #intraday_response = requests.get(api_url + "TIME_SERIES_INTRADAY&interval=15min&symbol=" + ticker + "&apikey=" + api_key)
@@ -100,11 +112,16 @@ def return_stock_graph(n_clicks, timeChoice, ticker):
         #set index column name
         df.index.name = 'date'
         
-        #
+        
         #Use matplotlib/plotly/better than plotly express for this
 
-        fig = px.line(data_frame=df, x=0, y=4)
-        #fig.update_layout(yaxis_tickprefix='$', yaxis_tickformat=',.2f')
+        fig = pgo.Figure()
+        fig.add_trace(pgo.Scatter(x=df[0], y=df[4]))
+
+        # fig = px.line(data_frame=df, x=0, y=4)
+
+
+        fig.update_layout(yaxis_tickprefix='$', yaxis_tickformat=',.2f')
     else:
         stock_name = 'error1'
         fig = pgo.Figure(data=[])
