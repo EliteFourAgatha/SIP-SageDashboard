@@ -72,8 +72,12 @@ def return_something(n_clicks, ticker, radio_value):
         df.index.name = 'date'
         stock_name = 'success_name1'
 
-        fig = px.line(data_frame=df, x=0, y=4)
-        #fig.update_layout(yaxis_tickprefix='$', yaxis_tickformat=',.2f')
+        #fig = px.line(data_frame=df, x=0, y=4)
+
+        fig = pgo.Figure()
+        fig.add_trace(pgo.Scatter(x=df[0], y=df[4]))
+
+        fig.update_layout(yaxis_tickprefix='$', yaxis_tickformat=',.2f')
     else:
         stock_name = 'error1'
         fig = pgo.Figure(data=[])

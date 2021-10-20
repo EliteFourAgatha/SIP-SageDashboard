@@ -3,6 +3,7 @@ from datetime import datetime
 import plotly.graph_objects as pgo
 import dash_core_components as dcc
 import dash_html_components as html
+import dash_table as dt
 from dash.dependencies import Input, Output
 
 # Generate basic display, also includes search bar + button
@@ -22,23 +23,27 @@ def return_input_bar():
                             #Stock input button
                             html.Div(html.Button('Submit', id='ticker-input-button'),
                                             style={'display': 'inline-block'})
-                                ]),
-                        #Error box for incorrect input
-                        html.Div(id='input-error-message', style={'color': 'red'}, children='Error Message Area')
-                    ], style={'width':'30%', 'display': 'inline-block'})
-        ])
+                                ])
+                            ])
+                    ])
 
-# Returns table for company profile
-def return_table():
-    return html.Table(title='Company Profile', id='basic-info-table',
-                        children=[
-                            #Tr defines a row in table
-                            html.Tr([html.Td('Sector:  '), html.Td(id='table-sector')]),
-                            html.Tr([html.Td('Industry:  '), html.Td(id='table-industry')])
-                        ])
-                                                    
+def return_profile_table():
+    return dt.DataTable(
+        id='stock-profile-table',
+        #style_cell={'whiteSpace':'pre-line'}, #Testing this currently try quick refresh
+        style_header={'display':'none'}, #Hide headers
+        columns=[{'name':'index', 'id': 'index-col'},
+                  {'name':'value', 'id':'value-col'}],
+        data=[{}]
+        #style_data_conditional=[
+            #{
+                #'if':{
 
-# Generate Cards and Graphs #
+                #}
+        #}]
+    )
+        
+#Generate Cards and Graphs #
 
 # Generate candlestick graph
 # Can change this to a line plot later not that much different

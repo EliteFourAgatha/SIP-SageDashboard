@@ -10,6 +10,7 @@ import matplotlib.pyplot as plt
 import dash
 import dash_core_components as dcc
 import dash_html_components as html
+import dash_table as dt
 import dash_bootstrap_components as dbc
 from dash.dependencies import Input, Output, State
 import plotly.graph_objects as pgo
@@ -28,7 +29,6 @@ app = dash.Dash(__name__, external_stylesheets=[dbc.themes.DARKLY])
 api_key = "BPE6KMKXLWCGGQW1"
 api_url = "https://www.alphavantage.co/query?function="
 
-
 # App layout
 app.layout = html.Div(
     [
@@ -44,7 +44,7 @@ app.layout = html.Div(
        ),
        dbc.Row(
            [
-               dbc.Col(return_table(), width=4),
+               dbc.Col(return_profile_table(), width=4),
                dbc.Col(
                    [
                         return_timeinterval(),
@@ -60,11 +60,8 @@ app.layout = html.Div(
                 Output('stock-ticker', 'children'), # Stock Ticker
                 Output('stock-price', 'children'), # Current Stock Price
                 Output('stock-pe-ratio', 'children'),
-                #Output('basic-info-table', 'children'), # Basic info like industry etc.
-                Output('table-sector', 'children'),
-                Output('table-industry', 'children'),
-                # Output('error-message', 'children'), # (Fill in which here____) Error Message
                 Output('stock-graph', 'figure'), # Price chart figure
+                Output('stock-profile-table', 'data'), # Company profile
                 [Input('ticker-input-button', 'n_clicks')],
                 [Input('time-interval-radio', 'value')],
                 [State('ticker-input-searchbar', 'value')])
@@ -88,16 +85,18 @@ def return_stock_graph(n_clicks, timeChoice, ticker):
 
     #
     #Return basic info table here
-    #
     table_sector = overview_json.get('Sector')
     table_industry = overview_json.get('Industry')
-
-    #Make this green
-    table_yearly_high = overview_json.get('52WeekHigh')
-
-    #Make this red
-    table_yearly_low = overview_json.get('52WeekLow')
+    table_yearly_high = overview_json.get('52WeekHigh')     #Make this green
+    table_yearly_low = overview_json.get('52WeekLow')    #Make this red
     table_target_price = overview_json.get('AnalystTargetPrice')
+
+    table_dataFrame = pd.DataFrame({
+        # Values supplied from overview call
+        'value':[table_sector, table_industry, table_yearly_high, table_yearly_low, table_target_price]},
+        #Index column row titles instead of numbers
+        index=['Sector', 'Industry', '52-Week High', '52-Week Low', 'Analyst Target Price'])
+    table_data = table_dataFrame.to_dict(orient='records')
 
     #Intraday call to populate graph
     #intraday_response = requests.get(api_url + "TIME_SERIES_INTRADAY&interval=15min&symbol=" + ticker + "&apikey=" + api_key)
@@ -126,12 +125,10 @@ def return_stock_graph(n_clicks, timeChoice, ticker):
         stock_name = 'error1'
         fig = pgo.Figure(data=[])
 
-    #stock_price = price_data.get(['Time Series (15min)'][0][('4. Close')])
     stock_price = 'current_stock_price'
 
     #Return these values to output, in order
-    return stock_name, stock_ticker, stock_price, stock_pe_ratio, table_sector, \
-            table_industry, fig
+    return stock_name, stock_ticker, stock_price, stock_pe_ratio, fig, table_data
                     
     #Global lightweight call for current price and % change
     #
