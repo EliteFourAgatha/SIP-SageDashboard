@@ -104,7 +104,7 @@ def return_stock_graph(n_clicks, timeChoice, ticker):
     if timeChoice == '1mo':
         #Do alpha vantage api call here for most recent month (year1month1 slice)
         ts = TimeSeries(key=api_key, output_format='csv')
-        data = ts.get_intraday_extended(symbol=ticker,interval='15min',slice='year1month1')
+        data = ts.get_intraday_extended(symbol=ticker,interval='60min',slice='year1month1')
         
         #csv --> dataframe
         df = pd.DataFrame(list(data[0]))

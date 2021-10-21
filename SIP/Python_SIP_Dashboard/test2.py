@@ -15,7 +15,8 @@ import dash_bootstrap_components as dbc
 from dash.dependencies import Input, Output, State
 import plotly.graph_objects as pgo
 import plotly.express as px
-import datetime
+from datetime import datetime
+from dateutil.relativedelta import relativedelta
 import mplfinance
 
 from Dashboard_Layout import *
@@ -64,20 +65,33 @@ def return_something(n_clicks, ticker, radio_value):
     if radio_value == '1mo':
         #Do alpha vantage api call here for most recent month (year1month1 slice)
         ts = TimeSeries(key=api_key, output_format='csv')
-        data = ts.get_intraday_extended(symbol=ticker,interval='15min',slice='year1month1')
+        data = ts.get_daily_adjusted(symbol=ticker)
         
         #csv --> dataframe
         df = pd.DataFrame(list(data[0]))
         #set index column name
         df.index.name = 'date'
+        # Use drop and tail to remove from dataframe
+        #  (compact = 100 data points, only need 30 for 1-month query.
+        #   (Drop 77 instead of 70 to account for weekends.)
+        df.drop(df.tail(77).index, inplace=True)
+
         stock_name = 'success_name1'
 
-        #fig = px.line(data_frame=df, x=0, y=4)
-
         fig = pgo.Figure()
-        fig.add_trace(pgo.Scatter(x=df[0], y=df[4]))
+        fig.add_trace(pgo.Scatter(x=df[0], y=df[4], fill='tonexty'))
+
+
 
         fig.update_layout(yaxis_tickprefix='$', yaxis_tickformat=',.2f')
+
+        # Get current date and set far-right x-axis marker. (October 21.)
+        # Then, use datetime to calculate the date (1-month) ago, and set far-left x-axis marker
+        # Do same for other dates (6-month, ytd, etc.)
+        current_date = datetime.now()
+        month_ago_date = current_date - relativedelta(month=1)
+        #tick0 is first x-axis tick, dtick is interval between ticks (M1 = 1 month)
+        fig.update_xaxes(tick0=month_ago_date, dtick='M1', tickmode='linear')
     else:
         stock_name = 'error1'
         fig = pgo.Figure(data=[])
