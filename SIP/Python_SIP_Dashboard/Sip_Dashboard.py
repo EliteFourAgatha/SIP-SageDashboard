@@ -1,10 +1,6 @@
 import matplotlib.pyplot as plt
 import pandas as pd
 import numpy as np
-from pandas import json_normalize
-import requests
-import json
-import alpha_vantage
 from alpha_vantage.timeseries import TimeSeries
 import matplotlib.pyplot as plt
 import dash
