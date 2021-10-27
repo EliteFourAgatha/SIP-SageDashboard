@@ -51,7 +51,9 @@ app.layout = html.Div(
        )
     ])           
 
-#Callback for stock price and graph
+# Returns: Table, graph, and general info
+#  Called: When input button is pressed
+#   Input: State of time radio bar and searchbar (value entered)
 @app.callback(Output('stock-name', 'children'), # Stock Name
                 Output('stock-ticker', 'children'), # Stock Ticker
                 Output('stock-price', 'children'), # Current Stock Price
@@ -66,7 +68,7 @@ app.layout = html.Div(
 # Function is called whenever ANY included inputs are changed
 #  State allows you to pass along extra values without firing the callback function
 #   So this function is only called when the input (button) is pressed
-def return_stock_graph(n_clicks, timeChoice, ticker):
+def return_dashboard(n_clicks, time_value, ticker):
     
     #try:
     #Company Overview call to populate table and headers
@@ -125,17 +127,19 @@ def return_stock_graph(n_clicks, timeChoice, ticker):
 
     #Return these values to output, in order
     return stock_name, stock_ticker, stock_price, stock_pe_ratio, fig, table_data
-                    
-    #Global lightweight call for current price and % change
-    #
-    #stock_global = requests.get(api_url + "GLOBAL_QUOTE&symbol=" + ticker + "&apikey=" + api_key)
-    #global_json = stock_global.json() #Maybe redundant, might be able return data in json form already
-    #stock_price = global_json.get('05. price')
-    #percent_change = global_json.get('10. change percent')
 
-#
-#Callback to return different time period on graph from radio buttons
-# ..Might not be necessary, might not have time. I think this is polish.
+# Returns: Updated graph
+#  Called: When (time) radio button is changed
+#   Input: New time radio value and chosen stock ticker
+@app.callback(Output('stock-graph', 'figure'),
+                [Input('time-interval-radio', 'value')],
+                [State('stock-ticker', 'value')],
+                prevent_initial_call=True)
+
+def return_updated_graph(radio_value, ticker):
+    
+    
+    return               
 
 if __name__ == '__main__':
     app.run_server(debug=True)

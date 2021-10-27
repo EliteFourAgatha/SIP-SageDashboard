@@ -49,7 +49,9 @@ app.layout = html.Div(
        )
     ])
 
-#Callback for stock price and graph
+# Returns: Table, graph, and general info
+#  Called: When input button is pressed
+#   Input: State of time radio bar and searchbar (value entered)
 @app.callback(Output('stock-name', 'children'), # Stock Name
                 Output('stock-ticker', 'children'), # Stock Ticker
                 #Output('stock-profile-table', 'children'), # Basic info like industry etc.
@@ -58,8 +60,8 @@ app.layout = html.Div(
                 [State('ticker-input-searchbar', 'value')],
                 [State('time-interval-radio', 'value')])
 
-def return_something(n_clicks, ticker, radio_value):
-    if radio_value == '1mo':
+def return_dashboard(n_clicks, ticker, time_value):
+    if time_value == '1mo':
         #Do alpha vantage api call here for most recent month (year1month1 slice)
         ts = TimeSeries(key=api_key, output_format='csv')
         data = ts.get_daily_adjusted(symbol=ticker)
@@ -94,14 +96,27 @@ def return_something(n_clicks, ticker, radio_value):
         fig = pgo.Figure(data=[])
     return stock_name, ticker, fig
 
+# Returns: Updated graph
+#  Called: When (time) radio button is changed
+#   Input: New time radio value and chosen stock ticker
+@app.callback(Output('stock-graph', 'figure'),
+                [Input('time-interval-radio', 'value')],
+                [State('stock-ticker', 'value')],
+                prevent_initial_call=True)
 
-#Function to supply ticker to api call
-# If you just hard-code a ticker, df is a dataframe object.
-#  If you try to pass a ticker, df becomes a "textfilereader" object and can't
-#    be used as a dataframe then which defeats the purpose of pd.read_csv.
-#      Need new method
-#def return_dataframe(ticker):
-#    df = pd.read_csv(api_url + 'TIME_SERIES_INTRADAY_EXTENDED&symbol='+ticker+'&interval=60min&slice=year1month2&apikey='+api_key+'&datatype=csv&outputsize=full')
+def return_updated_graph(radio_value, ticker):
+    
+    
+    return
+
 
 if __name__ == '__main__':
     app.run_server(debug=True)
+
+
+# If you just hard-code a ticker, df is a dataframe object.
+#  If you try to pass a ticker, df becomes a "textfilereader" object and can't
+#    be used as a dataframe, which means can't used read_csv
+#      Need new method
+#def return_dataframe(ticker):
+#    df = pd.read_csv(api_url + 'TIME_SERIES_INTRADAY_EXTENDED&symbol='+ticker+'&interval=60min&slice=year1month2&apikey='+api_key+'&datatype=csv&outputsize=full')
