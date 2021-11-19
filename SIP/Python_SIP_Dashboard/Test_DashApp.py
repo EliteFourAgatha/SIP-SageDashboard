@@ -19,8 +19,9 @@ import mplfinance
 from Dashboard_Layout import *
 from Stock_Functions import *
 
+FONT_AWESOME = "https://use.fontawesome.com/releases/v5.10.2/css/all.css"
 #Initialize Dash App
-app = dash.Dash(__name__, external_stylesheets=[dbc.themes.DARKLY])
+app = dash.Dash(__name__, external_stylesheets=[dbc.themes.DARKLY, FONT_AWESOME])
 
 api_key = "BPE6KMKXLWCGGQW1"
 api_url = "https://www.alphavantage.co/query?function="
@@ -49,9 +50,9 @@ app.layout = html.Div(
        )
     ])
 
-# Returns: Table, graph, and general info
-#  Called: When input button is pressed
-#   Input: State of time radio bar and searchbar (value entered)
+# Input: State of time radio bar and searchbar (value entered)
+#  Returns: Table, graph, and general info
+#   Called: When input button is pressed
 @app.callback(Output('stock-name', 'children'), # Stock Name
                 Output('stock-ticker', 'children'), # Stock Ticker
                 #Output('stock-profile-table', 'children'), # Basic info like industry etc.
@@ -99,15 +100,15 @@ def return_dashboard(n_clicks, ticker, time_value):
 # Returns: Updated graph
 #  Called: When (time) radio button is changed
 #   Input: New time radio value and chosen stock ticker
-@app.callback(Output('stock-graph', 'figure'),
-                [Input('time-interval-radio', 'value')],
-                [State('stock-ticker', 'value')],
-                prevent_initial_call=True)
+#@app.callback(Output('stock-graph', 'figure'),
+                #[Input('time-interval-radio', 'value')],
+                #[State('stock-ticker', 'value')],
+                #prevent_initial_call=True)
 
-def return_updated_graph(radio_value, ticker):
+#def return_updated_graph(radio_value, ticker):
     
     
-    return
+    #return
 
 
 if __name__ == '__main__':

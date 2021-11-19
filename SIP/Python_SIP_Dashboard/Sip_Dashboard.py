@@ -10,6 +10,7 @@ import dash_table as dt
 import dash_bootstrap_components as dbc
 from dash.dependencies import Input, Output, State
 import plotly.graph_objects as pgo
+import requests
 
 import plotly.express as px
 
@@ -24,6 +25,7 @@ app = dash.Dash(__name__, external_stylesheets=[dbc.themes.DARKLY])
 
 api_key = "BPE6KMKXLWCGGQW1"
 api_url = "https://www.alphavantage.co/query?function="
+peRatioLink = "https://www.forbes.com/advisor/investing/what-is-pe-price-earnings-ratio/"
 
 # App layout
 app.layout = html.Div(
@@ -34,8 +36,19 @@ app.layout = html.Div(
            [
                dbc.Col(html.H3(id='stock-name'), width=3),
                dbc.Col(html.H3(id='stock-ticker'), width=3),
-               dbc.Col(html.H3(id='stock-price'), width=3),
-               dbc.Col(html.H3(id='stock-pe-ratio'), width=3)
+               dbc.Col(dbc.Card(
+                   dbc.CardBody(
+                       [
+                           html.H5("P/E Ratio: ", className="card-title", id='stock-pe-ratio',
+                                style={'color': 'black', 'fontSize': '16'}),
+                           html.P("P/E Ratio description goes here.", className="card-text",
+                                style={'color': 'black', 'fontSize': '12'}),
+                           #Open url in new tab (target blank)
+                           html.A("P/E Ratio explained", href=peRatioLink, target="_blank",
+                                style={''})
+                       ]
+                   ), className="mt-4 shadow", color="white"), width=3),
+               dbc.Col(html.H3(id='stock-price'), width=3)
            ]
        ),
        dbc.Row(
@@ -51,9 +64,10 @@ app.layout = html.Div(
        )
     ])           
 
-# Returns: Table, graph, and general info
-#  Called: When input button is pressed
-#   Input: State of time radio bar and searchbar (value entered)
+#Input: State of time radio bar and searchbar (value entered)
+# Called: When input button is pressed
+#  Returns: Table, graph, and general info
+
 @app.callback(Output('stock-name', 'children'), # Stock Name
                 Output('stock-ticker', 'children'), # Stock Ticker
                 Output('stock-price', 'children'), # Current Stock Price
@@ -99,7 +113,7 @@ def return_dashboard(n_clicks, time_value, ticker):
     #Intraday call to populate graph
     #intraday_response = requests.get(api_url + "TIME_SERIES_INTRADAY&interval=15min&symbol=" + ticker + "&apikey=" + api_key)
     #price_data = intraday_response.json()#Maybe redundant, might be able return data in json form already
-    if timeChoice == '1mo':
+    if time_value == '1mo':
         #Do alpha vantage api call here for most recent month (year1month1 slice)
         ts = TimeSeries(key=api_key, output_format='csv')
         data = ts.get_intraday_extended(symbol=ticker,interval='60min',slice='year1month1')
@@ -127,20 +141,7 @@ def return_dashboard(n_clicks, time_value, ticker):
 
     #Return these values to output, in order
     return stock_name, stock_ticker, stock_price, stock_pe_ratio, fig, table_data
-
-# Returns: Updated graph
-#  Called: When (time) radio button is changed
-#   Input: New time radio value and chosen stock ticker
-@app.callback(Output('stock-graph', 'figure'),
-                [Input('time-interval-radio', 'value')],
-                [State('stock-ticker', 'value')],
-                prevent_initial_call=True)
-
-def return_updated_graph(radio_value, ticker):
-    
-    
-    return               
-
+          
 if __name__ == '__main__':
     app.run_server(debug=True)
 

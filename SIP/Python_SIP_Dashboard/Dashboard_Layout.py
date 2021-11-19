@@ -32,7 +32,7 @@ def return_profile_table():
         id='stock-profile-table',
         #style_cell={'whiteSpace':'pre-line'}, #Testing this currently try quick refresh
         style_header={'display':'none'}, #Hide headers
-        columns=[{'name':'index', 'id': 'index-col'},
+        columns=[{'name':'index', 'id': 'index-value'},
                   {'name':'value', 'id':'value-col'}],
         data=[{}]
         #style_data_conditional=[
