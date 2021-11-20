@@ -1,31 +1,29 @@
+from enum import auto
 import pandas as pd
 from datetime import datetime
 import plotly.graph_objects as pgo
 import dash_core_components as dcc
 import dash_html_components as html
+import dash_bootstrap_components as dbc
 import dash_table as dt
 from dash.dependencies import Input, Output
 
 # Generate basic display, also includes search bar + button
 def return_input_bar():
     return html.Div([
+        dbc.Row([
+            dbc.Col(width=4),
+            dbc.Col(
                 html.Div([
-                    html.Div(id='stock-price-input-bar', #change name later, just not 'stock-price'
-                                style={'width': '30%', 'display': 'inline-block',
-                                    'font-size': '200%'})
-                ],style={'width': '30%', 'display': 'inline-block', 'vertical-align': 'top'}),
-                    html.Div([
-                        html.Div([
-                            #Stock input bar
-                            html.Div(dcc.Input(id='ticker-input-searchbar', value='', type='text',
-                                                    placeholder='Please enter stock symbol'),
-                                                style={'display': 'inline-block', 'horizontal-align': 'center'}),
-                            #Stock input button
-                            html.Div(html.Button('Submit', id='ticker-input-button'),
-                                            style={'display': 'inline-block'})
-                                ])
-                            ])
-                    ])
+                    dcc.Input(id='ticker-input-searchbar', value='', type='text',
+                                                placeholder='Enter stock symbol here',
+                                                style={'display': 'inline-block', 'width':'70%'}),
+                    html.Button('Submit', id='ticker-input-button',
+                                        style={'display': 'inline-block', 'width':'30%'})
+                        ]), width=4), #Column width
+            dbc.Col(width=4),                      
+                ]),
+            ])
 
 def return_profile_table():
     return dt.DataTable(

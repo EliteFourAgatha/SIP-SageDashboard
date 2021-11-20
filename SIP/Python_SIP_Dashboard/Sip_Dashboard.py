@@ -25,12 +25,12 @@ app = dash.Dash(__name__, external_stylesheets=[dbc.themes.DARKLY])
 
 api_key = "BPE6KMKXLWCGGQW1"
 api_url = "https://www.alphavantage.co/query?function="
-peRatioLink = "https://www.forbes.com/advisor/investing/what-is-pe-price-earnings-ratio/"
+peRatio_Link = "https://www.forbes.com/advisor/investing/what-is-pe-price-earnings-ratio/"
 
 # App layout
 app.layout = html.Div(
     [
-       dbc.Row(dbc.Col(html.H1('Stock Dashboard', style={'text-align':'center'}))),
+       dbc.Row(dbc.Col(html.H2('Stock Dashboard', style={'text-align':'center'}))),
        dbc.Row(dbc.Col(html.Div(return_input_bar(), style={'margin':'auto'}))),
        dbc.Row(
            [
@@ -44,8 +44,7 @@ app.layout = html.Div(
                            html.P("P/E Ratio description goes here.", className="card-text",
                                 style={'color': 'black', 'fontSize': '12'}),
                            #Open url in new tab (target blank)
-                           html.A("P/E Ratio explained", href=peRatioLink, target="_blank",
-                                style={''})
+                           html.A("P/E Ratio explained", href=peRatio_Link, target="_blank")
                        ]
                    ), className="mt-4 shadow", color="white"), width=3),
                dbc.Col(html.H3(id='stock-price'), width=3)
