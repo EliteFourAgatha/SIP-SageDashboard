@@ -34,31 +34,40 @@ app.layout = html.Div(
        dbc.Row(dbc.Col(html.Div(return_input_bar(), style={'margin':'auto'}))),
        dbc.Row(
            [
-               dbc.Col(html.H3(id='stock-name'), width=3),
-               dbc.Col(html.H3(id='stock-ticker'), width=3),
-               dbc.Col(dbc.Card(
-                   dbc.CardBody(
-                       [
-                           html.H5("P/E Ratio: ", className="card-title", id='stock-pe-ratio',
-                                style={'color': 'black', 'fontSize': '16'}),
-                           html.P("P/E Ratio description goes here.", className="card-text",
-                                style={'color': 'black', 'fontSize': '12'}),
-                           #Open url in new tab (target blank)
-                           html.A("P/E Ratio explained", href=peRatio_Link, target="_blank")
-                       ]
-                   ), className="mt-4 shadow", color="white"), width=3),
-               dbc.Col(html.H3(id='stock-price'), width=3)
-           ]
-       ),
-       dbc.Row(
-           [
-               dbc.Col(return_profile_table(), width=4),
                dbc.Col(
+                   html.Div(
+                       [
+                            html.H3(id='stock-name'),
+                            html.H3(id='stock-ticker'),
+                            html.H3(id='stock-price'),
+                            return_profile_table()
+                       ]), 
+                    width=4),
+                dbc.Col(
                    [
                         return_timeinterval(),
                         dcc.Graph(id='stock-graph'),
                    ],
-                   width=8)
+                    width=8)
+            ]
+       ),
+       dbc.Row(
+           [
+                #dbc.Col(return_profile_table(), width=4),
+                dbc.Col(dbc.Card(
+                    [
+                    dbc.CardHeader("P/E Ratio",
+                                style={'fontSize':'20', 'text-align':'center'}),
+                    dbc.CardBody(
+                       [
+                           html.H5(className="card-title", id='stock-pe-ratio',
+                                style={'color': 'black', 'fontSize': '16'}),
+                           html.P("Description goes here.", className="card-text",
+                                style={'color': 'black', 'fontSize': '12'}),
+                           #Open url in new tab (target blank)
+                           html.A("P/E Ratio explained", href=peRatio_Link, target="_blank")
+                       ]
+                    )], className="mt-4 shadow", color="white"), width=3)
            ]
        )
     ])           
@@ -131,9 +140,10 @@ def return_dashboard(n_clicks, time_value, ticker):
         # fig = px.line(data_frame=df, x=0, y=4)
 
 
-        fig.update_layout(yaxis_tickprefix='$', yaxis_tickformat=',.2f')
+        fig.update_layout(yaxis_tickprefix='$', yaxis_tickformat='.2f')
+        fig.update_xaxes(ticks="outside", tickwidth=2, tickcolor='black', ticklen=10)
     else:
-        stock_name = 'error1'
+        stock_name = ''
         fig = pgo.Figure(data=[])
 
     stock_price = 'current_stock_price'

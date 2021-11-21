@@ -68,12 +68,3 @@ def return_timeinterval():
                         value='ytd'), #Set default value
                         style={'text-align':'center'})
     return layout
-
-# Returns graph layout
-def return_graph():
-    layout = html.Div([
-        html.Br(), #html.line break
-        return_timeinterval(),
-        dcc.Graph(id='main-graph')
-    ])
-    return layout
