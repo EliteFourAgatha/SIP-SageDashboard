@@ -25,21 +25,26 @@ def return_input_bar():
                 ]),
             ])
 
-def return_profile_table():
-    return dt.DataTable(
-        id='stock-profile-table',
+
+
+#Most likely unneeded, delete later
+#
+#
+#def return_profile_table():
+    #return dt.DataTable(
+        #id='stock-profile-table',
         #style_cell={'whiteSpace':'pre-line'}, #Testing this currently try quick refresh
-        style_header={'display':'none'}, #Hide headers
-        columns=[{'name':'index', 'id': 'index-value'},
-                  {'name':'value', 'id':'value-col'}],
-        data=[{}]
+        #style_header={'display':'none'}, #Hide headers
+        #columns=[{'name':'index', 'id': 'index-value'},
+                  #{'name':'value', 'id':'value-col'}],
+        #data=[{}]
         #style_data_conditional=[
             #{
                 #'if':{
 
                 #}
         #}]
-    )
+    #)
         
 #Generate Cards and Graphs #
 
@@ -68,3 +73,16 @@ def return_timeinterval():
                         value='ytd'), #Set default value
                         style={'text-align':'center'})
     return layout
+
+#Use beautifulsoup to scrape yahoo finance for alpha/beta of stock, given searched ticker
+# Compare to index funds which are always 0.
+#  Positive alpha: beat index by (alpha)%. Opposite for negative alpha.
+def return_alpha_beta_graph():
+    alpha_graph = dcc.Graph(
+        figure={
+            'layout':{
+                'title':'Alpha (risk coefficient)'
+            }
+        }
+    )
+    return alpha_graph

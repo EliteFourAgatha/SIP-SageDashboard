@@ -97,18 +97,16 @@ def return_dashboard(n_clicks, ticker, time_value):
         fig = pgo.Figure(data=[])
     return stock_name, ticker, fig
 
-# Returns: Updated graph
-#  Called: When (time) radio button is changed
-#   Input: New time radio value and chosen stock ticker
-#@app.callback(Output('stock-graph', 'figure'),
-                #[Input('time-interval-radio', 'value')],
-                #[State('stock-ticker', 'value')],
-                #prevent_initial_call=True)
 
-#def return_updated_graph(radio_value, ticker):
-    
-    
-    #return
+    #Test to get table to work. Save until sure unnecessary.
+    #
+    #
+    #table_dataFrame = pd.DataFrame({
+        # Values supplied from overview call
+        #'value':[table_sector, table_industry, stock_yearly_high, stock_yearly_low, stock_target_price]},
+        #Index column row titles instead of numbers
+        #index=['Sector', 'Industry', '52-Week High', '52-Week Low', 'Analyst Target Price'])
+    #table_data = table_dataFrame.to_dict(orient='records')
 
 
 if __name__ == '__main__':
