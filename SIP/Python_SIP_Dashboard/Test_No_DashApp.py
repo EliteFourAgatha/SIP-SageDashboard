@@ -18,13 +18,20 @@ import plotly.graph_objects as pgo
 api_key = "BPE6KMKXLWCGGQW1"
 api_url = "https://www.alphavantage.co/query?function="
 
+#Do alpha vantage api call here for most recent month (year1month1 slice)
 ts = TimeSeries(key=api_key, output_format='csv')
-data = ts.get_intraday_extended(symbol='FSLR',interval='15min',slice='year1month1')
-        
+data = ts.get_intraday_extended(symbol='FSLR',interval='60min',slice='year1month1')
+
 #csv --> dataframe
 df = pd.DataFrame(list(data[0]))
 #set index column name
 df.index.name = 'date'
 
-print(df.head(2))
+#fig = pgo.Figure()
+#fig.add_trace(pgo.Scatter(x=df[0], y=df[4]))
+
+#fig.update_yaxes(tickprefix='$', tickformat=',.2f', nticks=8)
+#fig.update_xaxes(ticks="outside", tickwidth=2, tickcolor='black', ticklen=10)
+
+print(df.head(25))
 

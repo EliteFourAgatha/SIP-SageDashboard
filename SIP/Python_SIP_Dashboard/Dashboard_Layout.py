@@ -63,8 +63,7 @@ def return_candlestick(dataFrame):
 def return_timeinterval():
     layout = html.Div(
         dcc.RadioItems(id='time-interval-radio',
-                        options=[{'label':'5 years', 'value':'5y'},
-                                {'label': '2 years', 'value': '2y'},
+                        options=[{'label': '2 years', 'value': '2y'},
                                 {'label': '1 year', 'value': '1y'},
                                 {'label': 'YTD', 'value': 'ytd'},
                                 {'label':'6 months', 'value': '6mo'},

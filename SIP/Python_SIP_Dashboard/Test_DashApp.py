@@ -98,17 +98,6 @@ def return_dashboard(n_clicks, ticker, time_value):
     return stock_name, ticker, fig
 
 
-    #Test to get table to work. Save until sure unnecessary.
-    #
-    #
-    #table_dataFrame = pd.DataFrame({
-        # Values supplied from overview call
-        #'value':[table_sector, table_industry, stock_yearly_high, stock_yearly_low, stock_target_price]},
-        #Index column row titles instead of numbers
-        #index=['Sector', 'Industry', '52-Week High', '52-Week Low', 'Analyst Target Price'])
-    #table_data = table_dataFrame.to_dict(orient='records')
-
-
 if __name__ == '__main__':
     app.run_server(debug=True)
 

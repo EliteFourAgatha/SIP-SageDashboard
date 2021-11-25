@@ -61,23 +61,21 @@ app.layout = html.Div(
                 dbc.Col(
                    [
                         return_timeinterval(),
-                        dcc.Graph(id='stock-price-graph',
-                        style={}), #Main Chart
+                        dcc.Graph(id='stock-graph'),
                    ],
                     width=8)
             ]
        ),
        dbc.Row(
            [
-                #dbc.Col(return_profile_table(), width=4),
                 dbc.Col(dbc.Card(
                     [
                     dbc.CardHeader(
                         [
-                            html.H5("Price/Earnings (P/E) Ratio",
+                            html.H5("P/E Ratio",
                                 style={'fontSize':'14', 'text-align':'center'}),
-                            #html.P("Price / Earnings",
-                                #style={'color': 'Purple', 'fontSize': '14', 'text-align':'center'})
+                            html.P("Price / Earnings",
+                                style={'color': 'Purple', 'fontSize': '14', 'text-align':'center'})
                         ]),
                     dbc.CardBody(
                        [
@@ -89,19 +87,7 @@ app.layout = html.Div(
                            #Open url in new tab (target blank)
                            html.A("P/E Ratio explained", href=peRatio_Link, target="_blank")
                        ]
-                    )], className="mt-4 shadow"), width=3),
-                dbc.Col(
-                    dcc.Graph(id='bar-graph',
-                    figure={
-                        'data': [
-                            {'x': [1], 'y': [0], 'type': 'bar', 'name': 'Index'},
-                            {'x': [1], 'y': [-1], 'type': 'bar', 'name': 'Stock'},
-                            ],
-                        'layout': {
-                            'title': 'Alpha (Risk Coefficient)'
-                        }
-    }) #Industry bar chart
-                )
+                    )], className="mt-4 shadow"), width=3)
            ]
        )
     ])           
@@ -112,11 +98,7 @@ app.layout = html.Div(
 
 @app.callback(Output('stock-name', 'children'), # Stock Name
                 Output('stock-ticker', 'children'), # Stock Ticker
-                Output('stock-price', 'children'), # Current Stock Price
-                Output('stock-pe-ratio', 'children'),
-                Output('stock-price-graph', 'figure'), # Price chart figure
-                Output('stock-sector', 'children'), # Sector
-                Output('stock-industry', 'children'), #Industry
+                Output('stock-graph', 'figure'), # Price chart figure
                 [Input('ticker-input-button', 'n_clicks')], #Input button fires callback
                 [State('time-interval-radio', 'value')], #Take radio value state
                 [State('ticker-input-searchbar', 'value')]) #Take input searchbar state
@@ -136,19 +118,6 @@ def return_dashboard(n_clicks, time_value, ticker):
     stock_name = overview_json.get('Name')
     stock_ticker = ticker
 
-    #Card info
-    stock_pe_ratio = overview_json.get('PERatio')
-    stock_sector = overview_json.get('Sector')
-    stock_industry = overview_json.get('Industry')
-
-    #Currently unused, use for cards
-    stock_ebitda = overview_json.get('EBITDA')
-    stock_dividend_yield = overview_json.get('DividendYield')
-    stock_yearly_high = overview_json.get('52WeekHigh')     #Make this green
-    stock_yearly_low = overview_json.get('52WeekLow')    #Make this red
-    stock_target_price = overview_json.get('AnalystTargetPrice')
-
-
     #Intraday call to populate graph
     #intraday_response = requests.get(api_url + "TIME_SERIES_INTRADAY&interval=15min&symbol=" + ticker + "&apikey=" + api_key)
     #price_data = intraday_response.json()#Maybe redundant, might be able return data in json form already
@@ -165,27 +134,20 @@ def return_dashboard(n_clicks, time_value, ticker):
         
         #Use matplotlib/plotly/better than plotly express for this
 
-        stockPrice_fig = pgo.Figure()
-        stockPrice_fig.add_trace(pgo.Scatter(x=df[0], y=df[4]))
+        fig = pgo.Figure()
+        fig.add_trace(pgo.Scatter(x=df[0], y=df[4]))
 
         # fig = px.line(data_frame=df, x=0, y=4)
 
 
-        stockPrice_fig.update_yaxes(tickprefix='$', tickformat=',.2f', nticks=5)
-        stockPrice_fig.update_xaxes(ticks="outside", tickwidth=2, tickcolor='black', ticklen=10)
-    elif time_value == '2y':
-        
-        ts = TimeSeries(key=api_key, output_format='csv')
-        data = ts.get_weekly_adjusted(symbol=ticker, datatype='csv')
+        fig.update_yaxes(tickprefix='$', tickformat=',.2f', nticks=10)
+        fig.update_xaxes(ticks="outside", tickwidth=2, tickcolor='black', ticklen=10)
     else:
         stock_name = ''
-        stockPrice_fig = pgo.Figure(data=[])
-
-    stock_price = 'current_stock_price'
+        fig = pgo.Figure(data=[])
 
     #Return these values to output, in order
-    return stock_name, stock_ticker, stock_price, stock_pe_ratio, stockPrice_fig, \
-        stock_sector, stock_industry
+    return stock_name, stock_ticker, fig
           
 if __name__ == '__main__':
     app.run_server(debug=True)
