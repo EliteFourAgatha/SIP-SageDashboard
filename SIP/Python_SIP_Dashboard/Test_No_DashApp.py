@@ -22,7 +22,7 @@ finprep_api_key = "1882bbe25d0a9a496ee5a1e20433c3a4"
 
 sector = 'Technology'
 industry = 'Software'
-exchange = 'NASDAQ'
+exchange = 'NYSE'
 marketcapmorethan = '1000000000'
 number_of_companies = 10
 #{} is empty dict

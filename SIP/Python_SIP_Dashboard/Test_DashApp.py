@@ -16,6 +16,7 @@ from datetime import datetime
 from dateutil.relativedelta import relativedelta
 import mplfinance
 
+
 from Dashboard_Layout import *
 from Stock_Functions import *
 
@@ -39,13 +40,20 @@ app.layout = html.Div(
        ),
        dbc.Row(
            [
-               dbc.Col(html.Table(id='stock-profile-table'), width=3),
                dbc.Col(
                    [
                         return_timeinterval(),
                         dcc.Graph(id='stock-graph'),
                    ],
                    width=8)
+           ]
+       ),
+       dbc.Row(
+           [
+               dbc.Col(
+                   dcc.Graph(id='beta-graph'),
+                   width=4
+               )
            ]
        )
     ])
@@ -56,12 +64,37 @@ app.layout = html.Div(
 @app.callback(Output('stock-name', 'children'), # Stock Name
                 Output('stock-ticker', 'children'), # Stock Ticker
                 #Output('stock-profile-table', 'children'), # Basic info like industry etc.
-                Output('stock-graph', 'figure'), # Price chart figure
+                #Output('stock-graph', 'figure'), # Price chart figure
+                Output('beta-graph', 'figure'),
                 [Input('ticker-input-button', 'n_clicks')],
                 [State('ticker-input-searchbar', 'value')],
                 [State('time-interval-radio', 'value')])
 
 def return_dashboard(n_clicks, ticker, time_value):
+
+    #try:
+    #Company Overview call to populate table and headers
+    overview_response = requests.get(api_url + "OVERVIEW&symbol=" + ticker + "&apikey=" + api_key)
+    overview_json = overview_response.json()#Maybe redundant, might be able return data in json form already
+
+    #Basic stock info (top left of layout)
+    stock_name = overview_json.get('Name')
+    stock_ticker = ticker
+
+    #Card info
+    stock_pe_ratio = overview_json.get('PERatio')
+    stock_sector = overview_json.get('Sector')
+    stock_industry = overview_json.get('Industry')
+
+    #beta_dict = return_industry_dict(ticker, stock_sector, stock_industry)
+
+    keys, vals = return_industry_lists(ticker, stock_sector, stock_industry)
+    #Create dict comprised of two lists
+    big_dict = {'Ticker':keys, 'Beta':vals}
+    beta_df = pd.DataFrame(big_dict)
+    bar_fig = px.bar(beta_df, x='Ticker', y='Beta')
+
+
     if time_value == '1mo':
         #Do alpha vantage api call here for most recent month (year1month1 slice)
         ts = TimeSeries(key=api_key, output_format='csv')
@@ -92,10 +125,11 @@ def return_dashboard(n_clicks, ticker, time_value):
         month_ago_date = current_date - relativedelta(month=1)
         #tick0 is first x-axis tick, dtick is interval between ticks (M1 = 1 month)
         fig.update_xaxes(tick0=month_ago_date, dtick='M1', tickmode='linear')
+
     else:
         stock_name = 'error1'
         fig = pgo.Figure(data=[])
-    return stock_name, ticker, fig
+    return stock_name, ticker, bar_fig
 
 
 if __name__ == '__main__':
