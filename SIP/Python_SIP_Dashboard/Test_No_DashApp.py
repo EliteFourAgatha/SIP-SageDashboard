@@ -15,11 +15,33 @@ import dash_bootstrap_components as dbc
 from dash.dependencies import Input, Output, State
 import plotly.graph_objects as pgo
 
-api_key = "BPE6KMKXLWCGGQW1"
+alpha_api_key = "BPE6KMKXLWCGGQW1"
 api_url = "https://www.alphavantage.co/query?function="
 
+finprep_api_key = "1882bbe25d0a9a496ee5a1e20433c3a4"
+
+sector = 'Technology'
+industry = 'Software'
+exchange = 'NASDAQ'
+marketcapmorethan = '1000000000'
+number_of_companies = 10
+#{} is empty dict
+symbols = {}
+keys = []
+values = []
+
+screener = requests.get(f'https://financialmodelingprep.com/api/v3/stock-screener?sector={sector}&industry={industry}&exchange={exchange}&limit={number_of_companies}&apikey={finprep_api_key}').json()
+#append screener[i] values to lists
+for item in screener:
+    keys.append(item['symbol'])
+    values.append(item['beta'])
+
+#Add all key/value pairs into dictionary
+for i in range(len(keys)):
+    symbols[keys[i]] = values[i]
+
 #Do alpha vantage api call here for most recent month (year1month1 slice)
-ts = TimeSeries(key=api_key, output_format='csv')
+ts = TimeSeries(key=alpha_api_key, output_format='csv')
 data = ts.get_intraday_extended(symbol='FSLR',interval='60min',slice='year1month1')
 
 #csv --> dataframe
@@ -30,8 +52,8 @@ df.index.name = 'date'
 #fig = pgo.Figure()
 #fig.add_trace(pgo.Scatter(x=df[0], y=df[4]))
 
-#fig.update_yaxes(tickprefix='$', tickformat=',.2f', nticks=8)
-#fig.update_xaxes(ticks="outside", tickwidth=2, tickcolor='black', ticklen=10)
+#fig.update_yaxes(tickprefix='$', tickformat=',.2f')
 
-print(df.head(25))
+print(df.head(5))
+print(symbols)
 
