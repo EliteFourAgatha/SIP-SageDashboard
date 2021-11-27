@@ -25,7 +25,11 @@ app = dash.Dash(__name__, external_stylesheets=[dbc.themes.DARKLY])
 
 api_key = "BPE6KMKXLWCGGQW1"
 api_url = "https://www.alphavantage.co/query?function="
+
+#Consider putting these in another file
 peRatio_Link = "https://www.forbes.com/advisor/investing/what-is-pe-price-earnings-ratio/"
+divYield_Link = "https://www.simplysafedividends.com/intelligent-income/posts/1071-dividend-yield-guide-definition-formula-examples-risks"
+
 
 # App layout
 app.layout = html.Div(
@@ -45,7 +49,7 @@ app.layout = html.Div(
                                     dbc.CardHeader("Sector",
                                         style={'text-align':'center'}),
                                     dbc.CardBody(html.H2(className="card-title", id='stock-sector',
-                                        style={'color': 'black', 'fontSize': '14'}))
+                                        style={'color': 'black', 'fontSize': '12'}))
                                 ]
                             ),
                             dbc.Card(                                
@@ -53,58 +57,81 @@ app.layout = html.Div(
                                     dbc.CardHeader("Industry",
                                         style={'text-align':'center'}),
                                     dbc.CardBody(html.H3(className="card-title", id='stock-industry',
-                                        style={'color': 'black', 'fontSize': '14'}))
+                                        style={'color': 'black', 'fontSize': '11'}))
                                 ]
                             ),
                        ]), 
-                    width=4),
+                    width=5),
                 dbc.Col(
                    [
                         return_timeinterval(),
                         dcc.Graph(id='stock-price-graph',
                         style={}), #Main Chart
                    ],
-                    width=8)
+                    width=7)
             ]
        ),
+       #Row of cards
        dbc.Row(
            [
-                #dbc.Col(return_profile_table(), width=4),
                 dbc.Col(dbc.Card(
                     [
                     dbc.CardHeader(
                         [
-                            html.H5("Price/Earnings (P/E) Ratio",
-                                style={'fontSize':'14', 'text-align':'center'}),
+                            html.H6("Price/Earnings (P/E) Ratio",
+                                style={'fontSize':'12', 'text-align':'center'}),
                             #html.P("Price / Earnings",
                                 #style={'color': 'Purple', 'fontSize': '14', 'text-align':'center'})
                         ]),
                     dbc.CardBody(
                        [
-                           html.H5(className="card-title", id='stock-pe-ratio',
-                                style={'color': 'black', 'fontSize': '16'}),
-                           html.P("High P/E ratio: Company experiencing growth or potentially overvalued.\
-                               Compare company's P/E to others in same industry", className="card-text",
-                                style={'color': 'white', 'fontSize': '12'}),
+                           html.H5(id='stock-pe-ratio',
+                                style={'color': 'black', 'fontSize': '16', 'text-align':'center'}),
+                           #html.P("P/E explained here?", className="card-text",
+                                #style={'color': 'white', 'fontSize': '12'}),
                            #Open url in new tab (target blank)
                            html.A("P/E Ratio explained", href=peRatio_Link, target="_blank")
                        ]
-                    )], className="mt-4 shadow"), width=3),
+                    )], className="mt-4 shadow"), width=2),
+                dbc.Col(dbc.Card(
+                    [
+                    dbc.CardHeader(
+                        [
+                            html.H6("Dividend Yield (%)",
+                                style={'fontSize':'12', 'text-align':'center'})
+                        ]),
+                    dbc.CardBody(
+                       [
+                           html.H5(id='stock-div-yield',
+                                style={'color': 'black', 'fontSize': '16', 'text-align':'center'}),
+                           #html.P("Div yield explained here?", className="card-text",
+                                #style={'color': 'white', 'fontSize': '12'}),
+                           #Open url in new tab (target blank)
+                           html.A("Div Yield explained", href=divYield_Link, target="_blank")
+                       ]
+                    )], className="mt-4 shadow"), width=2),
+           ]
+       ),
+       dbc.Row(
+           [
+                dbc.Col(width=4),
                 dbc.Col(
                     dcc.Graph(id='bar-graph',
                     figure={
                         'data': [
-                            {'x': [1], 'y': [0], 'type': 'bar', 'name': 'Index'},
-                            {'x': [1], 'y': [-1], 'type': 'bar', 'name': 'Stock'},
+                            {'x': [1], 'y': [1.3], 'type': 'bar', 'name': 'Chosen Stock'},
+                            {'x': [1], 'y': [0.8], 'type': 'bar', 'name': 'Stock1'},
+                            {'x': [1], 'y': [0.2], 'type': 'bar', 'name': 'Stock2'},
+                            {'x': [1], 'y': [-0.5], 'type': 'bar', 'name': 'Stock2'},
                             ],
-                        'layout': {
-                            'title': 'Alpha (Risk Coefficient)'
-                        }
-    }) #Industry bar chart
-                )
+                        'layout': {'title': 'Beta'}
+                    }),
+                    width=4),
+                dbc.Col(width=4)
            ]
        )
-    ])           
+    ]
+)           
 
 #Input: State of time radio bar and searchbar (value entered)
 # Called: When input button is pressed
@@ -113,7 +140,8 @@ app.layout = html.Div(
 @app.callback(Output('stock-name', 'children'), # Stock Name
                 Output('stock-ticker', 'children'), # Stock Ticker
                 Output('stock-price', 'children'), # Current Stock Price
-                Output('stock-pe-ratio', 'children'),
+                Output('stock-pe-ratio', 'children'), # P/E Ratio
+                Output('stock-div-yield', 'children'), # Dividend yield %
                 Output('stock-price-graph', 'figure'), # Price chart figure
                 Output('stock-sector', 'children'), # Sector
                 Output('stock-industry', 'children'), #Industry
@@ -136,8 +164,12 @@ def return_dashboard(n_clicks, time_value, ticker):
     stock_name = overview_json.get('Name')
     stock_ticker = ticker
 
+    #Used to determine which exchange stock is in for industry comparison
+    exchange = overview_json.get('Exchange')
+
     #Card info
     stock_pe_ratio = overview_json.get('PERatio')
+    stock_div_yield = overview_json.get('DividendYield')
     stock_sector = overview_json.get('Sector')
     stock_industry = overview_json.get('Industry')
 
@@ -148,10 +180,6 @@ def return_dashboard(n_clicks, time_value, ticker):
     stock_yearly_low = overview_json.get('52WeekLow')    #Make this red
     stock_target_price = overview_json.get('AnalystTargetPrice')
 
-
-    #Intraday call to populate graph
-    #intraday_response = requests.get(api_url + "TIME_SERIES_INTRADAY&interval=15min&symbol=" + ticker + "&apikey=" + api_key)
-    #price_data = intraday_response.json()#Maybe redundant, might be able return data in json form already
     if time_value == '1mo':
         #Do alpha vantage api call here for most recent month (year1month1 slice)
         ts = TimeSeries(key=api_key, output_format='csv')
@@ -162,17 +190,13 @@ def return_dashboard(n_clicks, time_value, ticker):
         #set index column name
         df.index.name = 'date'
         
-        
-        #Use matplotlib/plotly/better than plotly express for this
-
         stockPrice_fig = pgo.Figure()
+        #df[0] is date column, df[4] is close column
         stockPrice_fig.add_trace(pgo.Scatter(x=df[0], y=df[4]))
-
-        # fig = px.line(data_frame=df, x=0, y=4)
-
 
         stockPrice_fig.update_yaxes(tickprefix='$', tickformat=',.2f', nticks=5)
         stockPrice_fig.update_xaxes(ticks="outside", tickwidth=2, tickcolor='black', ticklen=10)
+    
     elif time_value == '2y':
         
         ts = TimeSeries(key=api_key, output_format='csv')
@@ -184,8 +208,8 @@ def return_dashboard(n_clicks, time_value, ticker):
     stock_price = 'current_stock_price'
 
     #Return these values to output, in order
-    return stock_name, stock_ticker, stock_price, stock_pe_ratio, stockPrice_fig, \
-        stock_sector, stock_industry
+    return stock_name, stock_ticker, stock_price, stock_pe_ratio, stock_div_yield, \
+     stockPrice_fig, stock_sector, stock_industry
           
 if __name__ == '__main__':
     app.run_server(debug=True)

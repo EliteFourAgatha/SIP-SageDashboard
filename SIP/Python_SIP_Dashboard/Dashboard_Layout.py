@@ -28,27 +28,6 @@ def return_input_bar():
             dbc.Col(width=4),                      
                 ]),
             ])
-
-
-
-#Most likely unneeded, delete later
-#
-#
-#def return_profile_table():
-    #return dt.DataTable(
-        #id='stock-profile-table',
-        #style_cell={'whiteSpace':'pre-line'}, #Testing this currently try quick refresh
-        #style_header={'display':'none'}, #Hide headers
-        #columns=[{'name':'index', 'id': 'index-value'},
-                  #{'name':'value', 'id':'value-col'}],
-        #data=[{}]
-        #style_data_conditional=[
-            #{
-                #'if':{
-
-                #}
-        #}]
-    #)
         
 #Generate Cards and Graphs #
 
@@ -92,6 +71,8 @@ def return_industry_dict(ticker, sector, industry):
     for item in screener:
         keys.append(item['symbol'])
         values.append(item['beta'])
+    
+    [float (i) for i in values]
 
     #Add all key/value pairs into dictionary
     for i in range(len(keys)):
@@ -100,22 +81,6 @@ def return_industry_dict(ticker, sector, industry):
         if keys[i] == ticker:
             del symbols[i]
     
-    return symbols
-
-def return_industry_lists(ticker, sector, industry):
-    exchange = 'NYSE'
-    marketcapmorethan = '1000000000'
-    number_of_companies = 5
-    keys = []
-    values = []
-
-    screener = requests.get(f'https://financialmodelingprep.com/api/v3/stock-screener?sector={sector}&industry={industry}&exchange={exchange}&limit={number_of_companies}&apikey={finprep_api_key}').json()
-    #append screener[i] values to lists
-    for item in screener:
-        keys.append(item['symbol'])
-        values.append(item['beta'])
-        if keys[item] == ticker:
-            del keys[item]
-            del values[item]
+    final_dict = {'symbols': keys, 'betas': values}
     
-    return keys, values
+    return final_dict

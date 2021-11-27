@@ -88,11 +88,8 @@ def return_dashboard(n_clicks, ticker, time_value):
 
     #beta_dict = return_industry_dict(ticker, stock_sector, stock_industry)
 
-    keys, vals = return_industry_lists(ticker, stock_sector, stock_industry)
-    #Create dict comprised of two lists
-    big_dict = {'Ticker':keys, 'Beta':vals}
-    beta_df = pd.DataFrame(big_dict)
-    bar_fig = px.bar(beta_df, x='Ticker', y='Beta')
+    beta_dict = return_industry_dict(ticker, stock_sector, stock_industry)
+    bar_fig = px.bar(data_frame=beta_dict, x='symbols', y='betas')
 
 
     if time_value == '1mo':
