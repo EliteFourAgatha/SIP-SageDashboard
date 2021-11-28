@@ -84,3 +84,45 @@ def return_industry_dict(ticker, sector, industry):
     final_dict = {'symbols': keys, 'betas': values}
     
     return final_dict
+
+def return_news_card(image_source_url, news_title, news_description, news_url):
+
+    card = dbc.CardGroup(
+        [
+            dbc.Card(
+                html.Img(src=image_source_url), #URL Image
+            ),
+            dbc.Card(
+                dbc.CardBody(
+                    [
+                        html.A(news_title, href=news_url, target="_blank",
+                        style={'font-size':'16'}), #Card title (url hyperlink)
+                        html.P(news_description,
+                        style={'font-size':'14'})
+                    ]
+                )
+            )
+        ]
+    )
+
+    return card
+    
+def return_news_card_test(image_source_url, news_title, news_description, news_url):
+
+    card = dbc.Card(
+        [
+            dbc.CardHeader(
+                html.A(news_title, href=news_url, target="_blank",
+                style={'font-size':'14'}), #Card title (url hyperlink)
+            ),
+            dbc.CardBody(
+                [
+                    html.Img(src=image_source_url), #URL Image
+                    html.P(news_description,
+                    style={'font-size':'12'})
+                ]
+            )
+        ]
+    )
+
+    return card

@@ -30,6 +30,14 @@ api_url = "https://www.alphavantage.co/query?function="
 peRatio_Link = "https://www.forbes.com/advisor/investing/what-is-pe-price-earnings-ratio/"
 divYield_Link = "https://www.simplysafedividends.com/intelligent-income/posts/1071-dividend-yield-guide-definition-formula-examples-risks"
 
+#News module test links
+image_url = 'https://cdn.vox-cdn.com/thumbor/CKp0YjnwF88--mWg1kfPmspvfzY=/0x358:5000x2976/fit-in/1200x630/cdn.vox-cdn.com/uploads/chorus_asset/file/22988084/1234440443.jpg'
+news_url = 'https://www.theverge.com/2021/11/5/22765098/kroger-bitcoin-cash-cryptocurrency-hoax-pump-dump'  
+news_title = 'A fake press release claiming Kroger accepts crypto reached the retailer’s own webpage'
+news_description = '"A crypto hoax claimed Kroger is accepting Bitcoin Cash. The fake press release was similar to one targeting Walmart earlier this year. The retailer quickly confirmed it’s fake, but not before the cryptocurrency’s price spiked by $30.'
+
+
+
 
 # App layout
 app.layout = html.Div(
@@ -114,13 +122,14 @@ app.layout = html.Div(
        ),
        dbc.Row(
            [
-                dbc.Col(width=4),
+                dbc.Col(return_news_card_test(image_url, news_title, news_description, news_url),
+                width=4),
                 dbc.Col(
                     dcc.Graph(id='bar-graph',
                     figure={
                         'data': [
                             {'x': [1], 'y': [1.3], 'type': 'bar', 'name': 'Chosen Stock'},
-                            {'x': [1], 'y': [0.8], 'type': 'bar', 'name': 'Stock1'},
+                            {'x': [1], 'y': [1], 'type': 'bar', 'name': 'S&P Index'},
                             {'x': [1], 'y': [0.2], 'type': 'bar', 'name': 'Stock2'},
                             {'x': [1], 'y': [-0.5], 'type': 'bar', 'name': 'Stock2'},
                             ],
