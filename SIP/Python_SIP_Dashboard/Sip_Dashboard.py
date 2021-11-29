@@ -34,7 +34,7 @@ divYield_Link = "https://www.simplysafedividends.com/intelligent-income/posts/10
 image_url = 'https://cdn.vox-cdn.com/thumbor/CKp0YjnwF88--mWg1kfPmspvfzY=/0x358:5000x2976/fit-in/1200x630/cdn.vox-cdn.com/uploads/chorus_asset/file/22988084/1234440443.jpg'
 news_url = 'https://www.theverge.com/2021/11/5/22765098/kroger-bitcoin-cash-cryptocurrency-hoax-pump-dump'  
 news_title = 'A fake press release claiming Kroger accepts crypto reached the retailer’s own webpage'
-news_description = '"A crypto hoax claimed Kroger is accepting Bitcoin Cash. The fake press release was similar to one targeting Walmart earlier this year. The retailer quickly confirmed it’s fake, but not before the cryptocurrency’s price spiked by $30.'
+news_description = 'A crypto hoax claimed Kroger is accepting Bitcoin Cash. The fake press release was similar to one targeting Walmart earlier this year. The retailer quickly confirmed it’s fake, but not before the cryptocurrency’s price spiked by $30.'
 
 
 
@@ -52,6 +52,7 @@ app.layout = html.Div(
                             html.H3(id='stock-name'),
                             html.H3(id='stock-ticker'),
                             html.H3(id='stock-price'),
+                            html.H3(id='stock-analyst-price'),
                             dbc.Card(
                                 [
                                     dbc.CardHeader("Sector",
@@ -105,7 +106,7 @@ app.layout = html.Div(
                     [
                     dbc.CardHeader(
                         [
-                            html.H6("Dividend Yield (%)",
+                            html.H6("Dividend Yield",
                                 style={'fontSize':'12', 'text-align':'center'})
                         ]),
                     dbc.CardBody(
@@ -122,8 +123,13 @@ app.layout = html.Div(
        ),
        dbc.Row(
            [
-                dbc.Col(return_news_card_test(image_url, news_title, news_description, news_url),
-                width=4),
+                dbc.Col(
+                    dbc.Card([
+                        return_news_card_test(image_url, news_title, news_description, news_url),
+                        return_news_card_test(image_url, news_title, news_description, news_url),
+                        return_news_card_test(image_url, news_title, news_description, news_url),
+                    ]),
+                width=8),
                 dbc.Col(
                     dcc.Graph(id='bar-graph',
                     figure={
@@ -131,12 +137,13 @@ app.layout = html.Div(
                             {'x': [1], 'y': [1.3], 'type': 'bar', 'name': 'Chosen Stock'},
                             {'x': [1], 'y': [1], 'type': 'bar', 'name': 'S&P Index'},
                             {'x': [1], 'y': [0.2], 'type': 'bar', 'name': 'Stock2'},
-                            {'x': [1], 'y': [-0.5], 'type': 'bar', 'name': 'Stock2'},
+                            {'x': [1], 'y': [-0.5], 'type': 'bar', 'name': 'Stock5'},
+                            {'x': [1], 'y': [0.4], 'type': 'bar', 'name': 'Stock3'},
+                            {'x': [1], 'y': [1.3], 'type': 'bar', 'name': 'Stock6'},
                             ],
                         'layout': {'title': 'Beta'}
                     }),
                     width=4),
-                dbc.Col(width=4)
            ]
        )
     ]
@@ -148,7 +155,8 @@ app.layout = html.Div(
 
 @app.callback(Output('stock-name', 'children'), # Stock Name
                 Output('stock-ticker', 'children'), # Stock Ticker
-                Output('stock-price', 'children'), # Current Stock Price
+                Output('stock-price', 'children'), # Current stock price
+                Output('stock-analyst-price', 'children'), # Analyst stock price
                 Output('stock-pe-ratio', 'children'), # P/E Ratio
                 Output('stock-div-yield', 'children'), # Dividend yield %
                 Output('stock-price-graph', 'figure'), # Price chart figure
@@ -187,7 +195,7 @@ def return_dashboard(n_clicks, time_value, ticker):
     stock_dividend_yield = overview_json.get('DividendYield')
     stock_yearly_high = overview_json.get('52WeekHigh')     #Make this green
     stock_yearly_low = overview_json.get('52WeekLow')    #Make this red
-    stock_target_price = overview_json.get('AnalystTargetPrice')
+    stock_target_price = 'Analyst target:' + str(overview_json.get('AnalystTargetPrice'))
 
     if time_value == '1mo':
         #Do alpha vantage api call here for most recent month (year1month1 slice)
@@ -217,8 +225,8 @@ def return_dashboard(n_clicks, time_value, ticker):
     stock_price = 'current_stock_price'
 
     #Return these values to output, in order
-    return stock_name, stock_ticker, stock_price, stock_pe_ratio, stock_div_yield, \
-     stockPrice_fig, stock_sector, stock_industry
+    return stock_name, stock_ticker, stock_price, stock_target_price, \
+    stock_pe_ratio, stock_div_yield, stockPrice_fig, stock_sector, stock_industry
           
 if __name__ == '__main__':
     app.run_server(debug=True)
