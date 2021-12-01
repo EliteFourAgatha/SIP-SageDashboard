@@ -29,8 +29,6 @@ def return_input_bar():
                 ]),
             ])
         
-#Generate Cards and Graphs #
-
 # Generate candlestick graph
 # Can change this to a line plot later not that much different
 def return_candlestick(dataFrame):
@@ -84,62 +82,3 @@ def return_industry_dict(ticker, sector, industry):
     final_dict = {'symbols': keys, 'betas': values}
     
     return final_dict
-
-def return_news_card(image_source_url, news_title, news_description, news_url):
-
-    card = dbc.CardGroup(
-        [
-            dbc.Card(
-                html.Img(src=image_source_url), #URL Image
-            ),
-            dbc.Card(
-                dbc.CardBody(
-                    [
-                        html.A(news_title, href=news_url, target="_blank",
-                        style={'font-size':'16'}), #Card title (url hyperlink)
-                        html.P(news_description,
-                        style={'font-size':'14'})
-                    ]
-                )
-            )
-        ]
-    )
-
-    return card
-    
-def return_news_card_test(image_source_url, news_title, news_description, news_url):
-
-    card = dbc.Card(
-    [
-        dbc.Row(
-            [
-                dbc.Col(
-                    [
-                        html.A(news_title, href=news_url, target="_blank",
-                        style={'font-size':'16', 'text-align':'center'}), #Card title (url hyperlink)
-                        dbc.CardImg(
-                        src=image_source_url,
-                        style={'text-align':'center'}
-                        )
-                    ],
-                    className="col-md-4",
-                ),
-                dbc.Col(
-                    dbc.CardBody(
-                        [
-                            html.P(news_description,
-                                style={'font-size':'12'}
-                            )
-                        ]
-                    ),
-                    className="col-md-8",
-                ),
-            ],
-            className="g-0 d-flex align-items-center",
-        )
-    ],
-    className="mb-3",
-    #style={"maxWidth": "540px"},
-)
-
-    return card

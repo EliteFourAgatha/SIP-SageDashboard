@@ -11,13 +11,16 @@ import dash_bootstrap_components as dbc
 from dash.dependencies import Input, Output, State
 import plotly.graph_objects as pgo
 import requests
+import json
+import itertools #for iterating through newsApi cards
 
+from newsapi import NewsApiClient
 import plotly.express as px
-
 import datetime
 import mplfinance
 
 from Dashboard_Layout import *
+from Card_Layout import *
 from Stock_Functions import *
 
 #Initialize Dash App
@@ -26,18 +29,13 @@ app = dash.Dash(__name__, external_stylesheets=[dbc.themes.DARKLY])
 api_key = "BPE6KMKXLWCGGQW1"
 api_url = "https://www.alphavantage.co/query?function="
 
-#Consider putting these in another file
-peRatio_Link = "https://www.forbes.com/advisor/investing/what-is-pe-price-earnings-ratio/"
-divYield_Link = "https://www.simplysafedividends.com/intelligent-income/posts/1071-dividend-yield-guide-definition-formula-examples-risks"
+news_api = '8ea69eabd7074f14a977d2f1541498f4'
 
 #News module test links
 image_url = 'https://cdn.vox-cdn.com/thumbor/CKp0YjnwF88--mWg1kfPmspvfzY=/0x358:5000x2976/fit-in/1200x630/cdn.vox-cdn.com/uploads/chorus_asset/file/22988084/1234440443.jpg'
 news_url = 'https://www.theverge.com/2021/11/5/22765098/kroger-bitcoin-cash-cryptocurrency-hoax-pump-dump'  
-news_title = 'A fake press release claiming Kroger accepts crypto reached the retailer’s own webpage'
-news_description = 'A crypto hoax claimed Kroger is accepting Bitcoin Cash. The fake press release was similar to one targeting Walmart earlier this year. The retailer quickly confirmed it’s fake, but not before the cryptocurrency’s price spiked by $30.'
-
-
-
+news_title = 'Stock news story title'
+news_description = 'Stock news story description goes here.'
 
 # App layout
 app.layout = html.Div(
@@ -47,32 +45,20 @@ app.layout = html.Div(
        dbc.Row(
            [
                dbc.Col(
+                   #Basic info (name, price, sector, industry)
                    html.Div(
                        [
                             html.H3(id='stock-name'),
                             html.H3(id='stock-ticker'),
                             html.H3(id='stock-price'),
                             html.H3(id='stock-analyst-price'),
-                            dbc.Card(
-                                [
-                                    dbc.CardHeader("Sector",
-                                        style={'text-align':'center'}),
-                                    dbc.CardBody(html.H2(className="card-title", id='stock-sector',
-                                        style={'color': 'black', 'fontSize': '12'}))
-                                ]
-                            ),
-                            dbc.Card(                                
-                                [
-                                    dbc.CardHeader("Industry",
-                                        style={'text-align':'center'}),
-                                    dbc.CardBody(html.H3(className="card-title", id='stock-industry',
-                                        style={'color': 'black', 'fontSize': '11'}))
-                                ]
-                            ),
+                            return_sector_card(),
+                            return_industry_card(),
                        ]), 
                     width=5),
                 dbc.Col(
                    [
+                       #Radio time buttons + Main graph
                         return_timeinterval(),
                         dcc.Graph(id='stock-price-graph',
                         style={}), #Main Chart
@@ -83,53 +69,40 @@ app.layout = html.Div(
        #Row of cards
        dbc.Row(
            [
-                dbc.Col(dbc.Card(
-                    [
-                    dbc.CardHeader(
-                        [
-                            html.H6("Price/Earnings (P/E) Ratio",
-                                style={'fontSize':'12', 'text-align':'center'}),
-                            #html.P("Price / Earnings",
-                                #style={'color': 'Purple', 'fontSize': '14', 'text-align':'center'})
-                        ]),
-                    dbc.CardBody(
-                       [
-                           html.H5(id='stock-pe-ratio',
-                                style={'color': 'black', 'fontSize': '16', 'text-align':'center'}),
-                           #html.P("P/E explained here?", className="card-text",
-                                #style={'color': 'white', 'fontSize': '12'}),
-                           #Open url in new tab (target blank)
-                           html.A("P/E Ratio explained", href=peRatio_Link, target="_blank")
-                       ]
-                    )], className="mt-4 shadow"), width=2),
-                dbc.Col(dbc.Card(
-                    [
-                    dbc.CardHeader(
-                        [
-                            html.H6("Dividend Yield",
-                                style={'fontSize':'12', 'text-align':'center'})
-                        ]),
-                    dbc.CardBody(
-                       [
-                           html.H5(id='stock-div-yield',
-                                style={'color': 'black', 'fontSize': '16', 'text-align':'center'}),
-                           #html.P("Div yield explained here?", className="card-text",
-                                #style={'color': 'white', 'fontSize': '12'}),
-                           #Open url in new tab (target blank)
-                           html.A("Div Yield explained", href=divYield_Link, target="_blank")
-                       ]
-                    )], className="mt-4 shadow"), width=2),
+                dbc.Col(
+                    return_peRatio_card(),
+                    width=2),
+                dbc.Col(
+                    return_peGRatio_card(),
+                    width=2),
+                dbc.Col(
+                    return_divYield_card(),
+                    width=2),
+                dbc.Col(
+                    return_metric_card(),
+                    width=2),
+                dbc.Col(
+                    return_metric_card(),
+                    width=2),
+                dbc.Col(
+                    return_metric_card(),
+                    width=2),
            ]
        ),
        dbc.Row(
            [
+               #News module
                 dbc.Col(
                     dbc.Card([
-                        return_news_card_test(image_url, news_title, news_description, news_url),
-                        return_news_card_test(image_url, news_title, news_description, news_url),
-                        return_news_card_test(image_url, news_title, news_description, news_url),
+                        #html.Div(id='news-card-one'),
+                        #html.Div(id='news-card-two'),
+                        #html.Div(id='news-card-three')
+                        return_news_card_test(news_title, news_description, news_url, image_url),
+                        return_news_card_test(news_title, news_description, news_url, image_url),
+                        return_news_card_test(news_title, news_description, news_url, image_url),
                     ]),
                 width=8),
+                #Beta/industry graph
                 dbc.Col(
                     dcc.Graph(id='bar-graph',
                     figure={
@@ -152,24 +125,25 @@ app.layout = html.Div(
 #Input: State of time radio bar and searchbar (value entered)
 # Called: When input button is pressed
 #  Returns: Table, graph, and general info
-
 @app.callback(Output('stock-name', 'children'), # Stock Name
                 Output('stock-ticker', 'children'), # Stock Ticker
                 Output('stock-price', 'children'), # Current stock price
                 Output('stock-analyst-price', 'children'), # Analyst stock price
                 Output('stock-pe-ratio', 'children'), # P/E Ratio
+                Output('stock-peg-ratio', 'children'), # (P/E)/Growth Ratio
                 Output('stock-div-yield', 'children'), # Dividend yield %
                 Output('stock-price-graph', 'figure'), # Price chart figure
                 Output('stock-sector', 'children'), # Sector
                 Output('stock-industry', 'children'), #Industry
+                #Output('news-card-one', 'children'), #Industry
+                #Output('news-card-two', 'children'), #Industry
+                #Output('news-card-three', 'children'), #Industry
                 [Input('ticker-input-button', 'n_clicks')], #Input button fires callback
                 [State('time-interval-radio', 'value')], #Take radio value state
                 [State('ticker-input-searchbar', 'value')]) #Take input searchbar state
 
-#Callback function. Takes inputs (in order), must return all outputs.
 # Function is called whenever ANY included inputs are changed
 #  State allows you to pass along extra values without firing the callback function
-#   So this function is only called when the input (button) is pressed
 def return_dashboard(n_clicks, time_value, ticker):
     
     #try:
@@ -181,11 +155,32 @@ def return_dashboard(n_clicks, time_value, ticker):
     stock_name = overview_json.get('Name')
     stock_ticker = ticker
 
-    #Used to determine which exchange stock is in for industry comparison
-    exchange = overview_json.get('Exchange')
+    #News module
+    news_client = NewsApiClient(api_key=news_api)
+    dict_test = news_client.get_top_headlines(q=str(stock_name))
+
+    if dict_test['totalResults'] != 0:
+        news_card_one = return_news_card_test(dict_test['articles'][0]['title'], 
+        dict_test['articles'][0]['description'],
+        dict_test['articles'][0]['url'],
+        dict_test['articles'][0]['urlToImage'])
+    else:
+        news_card_one = return_noNewsCard()
+
+    #only create one card. Then return default cards or nothing at all
+    #if dict_test['totalResults'] == 0:
+        #news_card_one = return_noNewsCard()
+        #news_card_two = return_emptyNewsCard()
+        #news_card_three = return_emptyNewsCard()
+    #else:
+        #news_card_one = return_emptyNewsCard()
+        #news_card_two = return_emptyNewsCard()
+        #new_card_three = return_emptyNewsCard()
+    
 
     #Card info
     stock_pe_ratio = overview_json.get('PERatio')
+    stock_peg_ratio = overview_json.get('PEGRatio')
     stock_div_yield = overview_json.get('DividendYield')
     stock_sector = overview_json.get('Sector')
     stock_industry = overview_json.get('Industry')
@@ -224,10 +219,16 @@ def return_dashboard(n_clicks, time_value, ticker):
 
     stock_price = 'current_stock_price'
 
+    #Industry comparison module
+    #Used to determine which exchange stock is in for industry comparison
+    exchange = overview_json.get('Exchange')
+
     #Return these values to output, in order
     return stock_name, stock_ticker, stock_price, stock_target_price, \
-    stock_pe_ratio, stock_div_yield, stockPrice_fig, stock_sector, stock_industry
+    stock_pe_ratio, stock_peg_ratio, stock_div_yield, stockPrice_fig, stock_sector, \
+    stock_industry, \
+    #news_card_one, \
+    #news_card_two, news_card_three
           
 if __name__ == '__main__':
     app.run_server(debug=True)
-
