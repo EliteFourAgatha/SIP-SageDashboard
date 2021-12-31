@@ -19,11 +19,12 @@ import mplfinance
 
 from Dashboard_Layout import *
 from Stock_Functions import *
+from Keys1 import *
 
 #Initialize Dash App
 app = dash.Dash(__name__, external_stylesheets=[dbc.themes.DARKLY])
 
-api_key = "BPE6KMKXLWCGGQW1"
+api_key = alpha_vantage_api_key
 api_url = "https://www.alphavantage.co/query?function="
 peRatio_Link = "https://www.forbes.com/advisor/investing/what-is-pe-price-earnings-ratio/"
 
@@ -122,20 +123,12 @@ def return_dashboard(n_clicks, time_value, ticker):
     #intraday_response = requests.get(api_url + "TIME_SERIES_INTRADAY&interval=15min&symbol=" + ticker + "&apikey=" + api_key)
     #price_data = intraday_response.json()#Maybe redundant, might be able return data in json form already
     if time_value == '1mo':
+        period = 60
         #Do alpha vantage api call here for most recent month (year1month1 slice)
-        ts = TimeSeries(key=api_key, output_format='csv')
-        data = ts.get_intraday_extended(symbol=ticker,interval='60min',slice='year1month1')
+        ts = TimeSeries(key=api_key, output_format='pandas')
+        data = ts.get_intraday(symbol=ticker, interval='1min', outputsize= 'full')
         
-        #csv --> dataframe
-        df = pd.DataFrame(list(data[0]))
-        #set index column name
-        df.index.name = 'date'
-        
-        
-        #Use matplotlib/plotly/better than plotly express for this
-
-        fig = pgo.Figure()
-        fig.add_trace(pgo.Scatter(x=df[0], y=df[4]))
+        df = data
 
         # fig = px.line(data_frame=df, x=0, y=4)
 

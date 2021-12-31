@@ -42,17 +42,8 @@ for i in range(len(keys)):
 
 #Do alpha vantage api call here for most recent month (year1month1 slice)
 ts = TimeSeries(key=alpha_api_key, output_format='csv')
-data = ts.get_intraday_extended(symbol='FSLR',interval='60min',slice='year1month1')
+data = ts.get_weekly(symbol='FSLR')
 
-#csv --> dataframe
-df = pd.DataFrame(list(data[0]))
-#set index column name
-df.index.name = 'date'
-
-#fig = pgo.Figure()
-#fig.add_trace(pgo.Scatter(x=df[0], y=df[4]))
-
-#fig.update_yaxes(tickprefix='$', tickformat=',.2f')
 
 print(df.head(5))
 print(symbols)

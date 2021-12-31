@@ -2,6 +2,7 @@ import matplotlib.pyplot as plt
 import pandas as pd
 import numpy as np
 from alpha_vantage.timeseries import TimeSeries
+from alpha_vantage.techindicators import TechIndicators
 import matplotlib.pyplot as plt
 import dash
 import dash_core_components as dcc
@@ -22,14 +23,15 @@ import mplfinance
 from Dashboard_Layout import *
 from Card_Layout import *
 from Stock_Functions import *
+from Keys1 import *
 
 #Initialize Dash App
 app = dash.Dash(__name__, external_stylesheets=[dbc.themes.DARKLY])
 
-api_key = "BPE6KMKXLWCGGQW1"
+api_key = alpha_vantage_api_key
 api_url = "https://www.alphavantage.co/query?function="
 
-news_api = '8ea69eabd7074f14a977d2f1541498f4'
+news_api = news_api_key
 
 #News module test links
 image_url = 'https://cdn.vox-cdn.com/thumbor/CKp0YjnwF88--mWg1kfPmspvfzY=/0x358:5000x2976/fit-in/1200x630/cdn.vox-cdn.com/uploads/chorus_asset/file/22988084/1234440443.jpg'
