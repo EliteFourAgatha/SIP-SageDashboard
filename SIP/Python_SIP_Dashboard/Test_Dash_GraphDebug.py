@@ -2,6 +2,7 @@ import matplotlib.pyplot as plt
 import pandas as pd
 import numpy as np
 from alpha_vantage.timeseries import TimeSeries
+from alpha_vantage.techindicators import TechIndicators
 import matplotlib.pyplot as plt
 import dash
 import dash_core_components as dcc
@@ -62,7 +63,7 @@ app.layout = html.Div(
                 dbc.Col(
                    [
                         return_timeinterval(),
-                        dcc.Graph(id='stock-graph'),
+                        dcc.Graph(id='stock-graph', animate=True),
                    ],
                     width=8)
             ]
@@ -93,25 +94,20 @@ app.layout = html.Div(
        )
     ])           
 
+ts = TimeSeries(key=api_key, output_format='pandas')
+ti = TechIndicators(key=api_key, output_format='pandas')
+
 #Input: State of time radio bar and searchbar (value entered)
 # Called: When input button is pressed
 #  Returns: Table, graph, and general info
 
-@app.callback(Output('stock-name', 'children'), # Stock Name
-                Output('stock-ticker', 'children'), # Stock Ticker
-                Output('stock-graph', 'figure'), # Price chart figure
+@app.callback(Output('stock-graph', 'figure'), # Price chart figure
                 [Input('ticker-input-button', 'n_clicks')], #Input button fires callback
                 [State('time-interval-radio', 'value')], #Take radio value state
                 [State('ticker-input-searchbar', 'value')]) #Take input searchbar state
 
-#Callback function. Takes inputs (in order), must return all outputs.
-# Function is called whenever ANY included inputs are changed
-#  State allows you to pass along extra values without firing the callback function
-#   So this function is only called when the input (button) is pressed
 def return_dashboard(n_clicks, time_value, ticker):
     
-    #try:
-    #Company Overview call to populate table and headers
     overview_response = requests.get(api_url + "OVERVIEW&symbol=" + ticker + "&apikey=" + api_key)
     overview_json = overview_response.json()#Maybe redundant, might be able return data in json form already
 
@@ -119,28 +115,73 @@ def return_dashboard(n_clicks, time_value, ticker):
     stock_name = overview_json.get('Name')
     stock_ticker = ticker
 
-    #Intraday call to populate graph
-    #intraday_response = requests.get(api_url + "TIME_SERIES_INTRADAY&interval=15min&symbol=" + ticker + "&apikey=" + api_key)
-    #price_data = intraday_response.json()#Maybe redundant, might be able return data in json form already
-    if time_value == '1mo':
-        period = 60
-        #Do alpha vantage api call here for most recent month (year1month1 slice)
-        ts = TimeSeries(key=api_key, output_format='pandas')
-        data = ts.get_intraday(symbol=ticker, interval='1min', outputsize= 'full')
-        
-        df = data
+    #if time_value == '1mo':
+    period = 60
 
-        # fig = px.line(data_frame=df, x=0, y=4)
+    data_ts, meta_data_ts = ts.get_intraday(symbol=ticker.upper(), interval='1min', outputsize='full')
+    data_ti, meta_data_ti = ti.get_rsi(symbol=ticker, interval='1min', time_period=period)
+    df = data_ts[0]
 
+    df.index = pd.Index(map(lambda x: str(x)[:-3], df.index))
 
-        fig.update_yaxes(tickprefix='$', tickformat=',.2f', nticks=10)
-        fig.update_xaxes(ticks="outside", tickwidth=2, tickcolor='black', ticklen=10)
-    else:
-        stock_name = ''
-        fig = pgo.Figure(data=[])
+    df2 = data_ti
+
+    total_df = pd.concat([df, df2], axis=1, sort=True)
+
+    #Break down dataframes
+    openList = []
+    for o in total_df['1. open']:
+        openList.append(float (o))
+    highList = []
+    for h in total_df['2. high']:
+        highList.append(float (h))
+    lowList = []
+    for l in total_df['3. low']:
+        lowList.append(float (l))
+    closeList = []
+    for c in total_df['4. close']:
+        closeList.append(float (c))
+    
+    rsi_offset = []
+    
+    #zip two lists together ('RSI' column from ti and 'low' column)
+    # for each value 'r' from RSI and 'l' from low, append to new list
+    for r, l in zip(total_df['RSI'], lowList):
+        rsi_offset.append(l - (l / r))
+    
+    #scatter plot for buy / sell / color coding part.
+    scatter = pgo.Scatter(
+
+    )
+    #actual fig
+    mainGraph = pgo.Candlestick(
+        x = total_df.index,
+        open = openList,
+        high = highList,
+        low = lowList,
+        close = closeList,
+        increasing={'line': {'color': '#00CC94'}},
+        decreasing={'line': {'color': '#F50030'}},            
+        name = 'candlestick'
+    )
+    data = [mainGraph]
+
+    layout = pgo.Layout(
+        paper_bgcolor='#27293d',
+        plot_bgcolor='rgba(0, 0, 0, 0)',
+        xaxis = dict(type='category'),
+        yaxis = dict(range=[min(rsi_offset), max(highList)]),
+        font = dict(color='white'),
+    )
+
+        #mainGraph.update_yaxes(tickprefix='$', tickformat=',.2f', nticks=10)
+        #mainGraph.update_xaxes(ticks="outside", tickwidth=2, tickcolor='black', ticklen=10)
+    #else:
+        #stock_name = ''
+        #mainGraph = pgo.Figure(data=[])
 
     #Return these values to output, in order
-    return stock_name, stock_ticker, fig
+    return {'data': data, 'layout': layout}
           
 if __name__ == '__main__':
     app.run_server(debug=True)
