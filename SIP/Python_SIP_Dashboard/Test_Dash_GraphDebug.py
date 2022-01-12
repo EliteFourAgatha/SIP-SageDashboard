@@ -18,6 +18,7 @@ import plotly.express as px
 import datetime
 import mplfinance
 
+from Card_Layout import *
 from Dashboard_Layout import *
 from Stock_Functions import *
 from Keys1 import *
@@ -27,9 +28,11 @@ app = dash.Dash(__name__, external_stylesheets=[dbc.themes.DARKLY])
 
 api_key = alpha_vantage_api_key
 api_url = "https://www.alphavantage.co/query?function="
-peRatio_Link = "https://www.forbes.com/advisor/investing/what-is-pe-price-earnings-ratio/"
 
-# App layout
+ti = TechIndicators(key=api_key, output_format='pandas')
+
+#CONSIDER REMOVING TIME VALUE ALTOGETHER. JUST PULL DATA AND GRAPH IT.
+
 app.layout = html.Div(
     [
        dbc.Row(dbc.Col(html.H2('Stock Dashboard', style={'text-align':'center'}))),
@@ -40,73 +43,24 @@ app.layout = html.Div(
                    html.Div(
                        [
                             html.H3(id='stock-name'),
-                            html.H3(id='stock-ticker'),
-                            html.H3(id='stock-price'),
-                            dbc.Card(
-                                [
-                                    dbc.CardHeader("Sector",
-                                        style={'text-align':'center'}),
-                                    dbc.CardBody(html.H2(className="card-title", id='stock-sector',
-                                        style={'color': 'black', 'fontSize': '14'}))
-                                ]
-                            ),
-                            dbc.Card(                                
-                                [
-                                    dbc.CardHeader("Industry",
-                                        style={'text-align':'center'}),
-                                    dbc.CardBody(html.H3(className="card-title", id='stock-industry',
-                                        style={'color': 'black', 'fontSize': '14'}))
-                                ]
-                            ),
+                            html.H3(id='stock-ticker')
                        ]), 
                     width=4),
                 dbc.Col(
                    [
-                        return_timeinterval(),
                         dcc.Graph(id='stock-graph', animate=True),
                    ],
                     width=8)
             ]
        ),
-       dbc.Row(
-           [
-                dbc.Col(dbc.Card(
-                    [
-                    dbc.CardHeader(
-                        [
-                            html.H5("P/E Ratio",
-                                style={'fontSize':'14', 'text-align':'center'}),
-                            html.P("Price / Earnings",
-                                style={'color': 'Purple', 'fontSize': '14', 'text-align':'center'})
-                        ]),
-                    dbc.CardBody(
-                       [
-                           html.H5(className="card-title", id='stock-pe-ratio',
-                                style={'color': 'black', 'fontSize': '16'}),
-                           html.P("High P/E ratio: Company experiencing growth or potentially overvalued.\
-                               Compare company's P/E to others in same industry", className="card-text",
-                                style={'color': 'white', 'fontSize': '12'}),
-                           #Open url in new tab (target blank)
-                           html.A("P/E Ratio explained", href=peRatio_Link, target="_blank")
-                       ]
-                    )], className="mt-4 shadow"), width=3)
-           ]
-       )
-    ])           
-
-ts = TimeSeries(key=api_key, output_format='pandas')
-ti = TechIndicators(key=api_key, output_format='pandas')
-
-#Input: State of time radio bar and searchbar (value entered)
-# Called: When input button is pressed
-#  Returns: Table, graph, and general info
+    ]
+)           
 
 @app.callback(Output('stock-graph', 'figure'), # Price chart figure
                 [Input('ticker-input-button', 'n_clicks')], #Input button fires callback
-                [State('time-interval-radio', 'value')], #Take radio value state
                 [State('ticker-input-searchbar', 'value')]) #Take input searchbar state
 
-def return_dashboard(n_clicks, time_value, ticker):
+def return_dashboard(n_clicks, ticker):
     
     overview_response = requests.get(api_url + "OVERVIEW&symbol=" + ticker + "&apikey=" + api_key)
     overview_json = overview_response.json()#Maybe redundant, might be able return data in json form already
@@ -115,73 +69,33 @@ def return_dashboard(n_clicks, time_value, ticker):
     stock_name = overview_json.get('Name')
     stock_ticker = ticker
 
-    #if time_value == '1mo':
-    period = 60
-
-    data_ts, meta_data_ts = ts.get_intraday(symbol=ticker.upper(), interval='1min', outputsize='full')
-    data_ti, meta_data_ti = ti.get_rsi(symbol=ticker, interval='1min', time_period=period)
-    df = data_ts[0]
-
-    df.index = pd.Index(map(lambda x: str(x)[:-3], df.index))
-
-    df2 = data_ti
-
-    total_df = pd.concat([df, df2], axis=1, sort=True)
-
-    #Break down dataframes
-    openList = []
-    for o in total_df['1. open']:
-        openList.append(float (o))
-    highList = []
-    for h in total_df['2. high']:
-        highList.append(float (h))
-    lowList = []
-    for l in total_df['3. low']:
-        lowList.append(float (l))
-    closeList = []
-    for c in total_df['4. close']:
-        closeList.append(float (c))
+    #Do alpha vantage api call here for most recent month (year1month1 slice)
+    ts = TimeSeries(key=api_key, output_format='pandas')
+    data, meta_data = ts.get_intraday(symbol=ticker, interval='1min', outputsize='full')
     
-    rsi_offset = []
+    df = data
+    df.reset_index(inplace=True)
+    df.set_index("date", inplace=True)
     
-    #zip two lists together ('RSI' column from ti and 'low' column)
-    # for each value 'r' from RSI and 'l' from low, append to new list
-    for r, l in zip(total_df['RSI'], lowList):
-        rsi_offset.append(l - (l / r))
-    
-    #scatter plot for buy / sell / color coding part.
-    scatter = pgo.Scatter(
+    close = df['4. close']
 
-    )
-    #actual fig
-    mainGraph = pgo.Candlestick(
-        x = total_df.index,
-        open = openList,
-        high = highList,
-        low = lowList,
-        close = closeList,
-        increasing={'line': {'color': '#00CC94'}},
-        decreasing={'line': {'color': '#F50030'}},            
-        name = 'candlestick'
-    )
-    data = [mainGraph]
-
-    layout = pgo.Layout(
-        paper_bgcolor='#27293d',
-        plot_bgcolor='rgba(0, 0, 0, 0)',
-        xaxis = dict(type='category'),
-        yaxis = dict(range=[min(rsi_offset), max(highList)]),
-        font = dict(color='white'),
+    stockPrice_fig = dcc.Graph(
+        id='example-graph',
+        figure={
+            'data': [
+                {'x': df.index, 'y': close, 'type': 'line', 'name': ticker},
+            ],
+            'layout':{
+                'title': ticker
+            }
+        }
     )
 
-        #mainGraph.update_yaxes(tickprefix='$', tickformat=',.2f', nticks=10)
-        #mainGraph.update_xaxes(ticks="outside", tickwidth=2, tickcolor='black', ticklen=10)
-    #else:
-        #stock_name = ''
-        #mainGraph = pgo.Figure(data=[])
+    stockPrice_fig.update_yaxes(tickprefix='$', tickformat=',.2f', nticks=5)
+    stockPrice_fig.update_xaxes(ticks="outside", tickwidth=2, tickcolor='black', ticklen=10)
 
-    #Return these values to output, in order
-    return {'data': data, 'layout': layout}
+    return stockPrice_fig
+
           
 if __name__ == '__main__':
     app.run_server(debug=True)

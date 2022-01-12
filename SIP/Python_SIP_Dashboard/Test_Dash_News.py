@@ -22,6 +22,7 @@ import itertools
 
 from newsapi import NewsApiClient
 
+from Card_Layout import *
 from Dashboard_Layout import *
 from Stock_Functions import *
 
