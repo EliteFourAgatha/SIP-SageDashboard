@@ -33,12 +33,6 @@ api_url = "https://www.alphavantage.co/query?function="
 
 news_api = news_api_key
 
-#News module test links
-image_url = 'https://cdn.vox-cdn.com/thumbor/CKp0YjnwF88--mWg1kfPmspvfzY=/0x358:5000x2976/fit-in/1200x630/cdn.vox-cdn.com/uploads/chorus_asset/file/22988084/1234440443.jpg'
-news_url = 'https://www.theverge.com/2021/11/5/22765098/kroger-bitcoin-cash-cryptocurrency-hoax-pump-dump'  
-news_title = 'Stock news story title'
-news_description = 'Stock news story description goes here.'
-
 # App layout
 app.layout = html.Div(
     [
@@ -96,12 +90,9 @@ app.layout = html.Div(
                #News module
                 dbc.Col(
                     dbc.Card([
-                        #html.Div(id='news-card-one'),
-                        #html.Div(id='news-card-two'),
-                        #html.Div(id='news-card-three')
-                        return_news_card_test(news_title, news_description, news_url, image_url),
-                        return_news_card_test(news_title, news_description, news_url, image_url),
-                        return_news_card_test(news_title, news_description, news_url, image_url),
+                        html.Div(id='news-card-one'),
+                        html.Div(id='news-card-two'),
+                        html.Div(id='news-card-three')
                     ]),
                 width=8),
                 #Beta/industry graph
@@ -137,12 +128,13 @@ app.layout = html.Div(
                 Output('stock-price-graph', 'figure'), # Price chart figure
                 Output('stock-sector', 'children'), # Sector
                 Output('stock-industry', 'children'), #Industry
-                #Output('news-card-one', 'children'), #Industry
-                #Output('news-card-two', 'children'), #Industry
-                #Output('news-card-three', 'children'), #Industry
+                Output('news-card-one', 'children'), #Industry
+                Output('news-card-two', 'children'), #Industry
+                Output('news-card-three', 'children'), #Industry
                 [Input('ticker-input-button', 'n_clicks')], #Input button fires callback
                 [State('time-interval-radio', 'value')], #Take radio value state
-                [State('ticker-input-searchbar', 'value')]) #Take input searchbar state
+                [State('ticker-input-searchbar', 'value')], #Take input searchbar state
+                prevent_initial_call = True)
 
 # Function is called whenever ANY included inputs are changed
 #  State allows you to pass along extra values without firing the callback function
@@ -157,28 +149,27 @@ def return_dashboard(n_clicks, time_value, ticker):
     stock_name = overview_json.get('Name')
     stock_ticker = ticker
 
-    #News module
     news_client = NewsApiClient(api_key=news_api)
-    dict_test = news_client.get_top_headlines(q=str(stock_name))
+    news_dict = news_client.get_everything(qintitle=ticker, language="en")
 
-    if dict_test['totalResults'] != 0:
-        news_card_one = return_news_card_test(dict_test['articles'][0]['title'], 
-        dict_test['articles'][0]['description'],
-        dict_test['articles'][0]['url'],
-        dict_test['articles'][0]['urlToImage'])
-    else:
-        news_card_one = return_noNewsCard()
+    artOne_title = news_dict['articles'][0]['title']
+    artOne_desc = news_dict['articles'][0]['description']
+    artOne_url = news_dict['articles'][0]['url']
+    artOne_urlImage = news_dict['articles'][0]['urlToImage']
 
-    #only create one card. Then return default cards or nothing at all
-    #if dict_test['totalResults'] == 0:
-        #news_card_one = return_noNewsCard()
-        #news_card_two = return_emptyNewsCard()
-        #news_card_three = return_emptyNewsCard()
-    #else:
-        #news_card_one = return_emptyNewsCard()
-        #news_card_two = return_emptyNewsCard()
-        #new_card_three = return_emptyNewsCard()
-    
+    artTwo_title = news_dict['articles'][1]['title']
+    artTwo_desc = news_dict['articles'][1]['description']
+    artTwo_url = news_dict['articles'][1]['url']
+    artTwo_urlImage = news_dict['articles'][1]['urlToImage']
+
+    artThree_title = news_dict['articles'][2]['title']
+    artThree_desc = news_dict['articles'][2]['description']
+    artThree_url = news_dict['articles'][2]['url']
+    artThree_urlImage = news_dict['articles'][2]['urlToImage']
+
+    news_card_one = return_news_card_test(artOne_title, artOne_desc, artOne_url, artOne_urlImage)
+    news_card_two = return_news_card_test(artTwo_title, artTwo_desc, artTwo_url, artTwo_urlImage)
+    news_card_three = return_news_card_test(artThree_title, artThree_desc, artThree_url, artThree_urlImage) 
 
     #Card info
     stock_pe_ratio = overview_json.get('PERatio')
@@ -211,10 +202,6 @@ def return_dashboard(n_clicks, time_value, ticker):
         stockPrice_fig.update_yaxes(tickprefix='$', tickformat=',.2f', nticks=5)
         stockPrice_fig.update_xaxes(ticks="outside", tickwidth=2, tickcolor='black', ticklen=10)
     
-    elif time_value == '2y':
-        
-        ts = TimeSeries(key=api_key, output_format='csv')
-        data = ts.get_weekly_adjusted(symbol=ticker, datatype='csv')
     else:
         stock_name = ''
         stockPrice_fig = pgo.Figure(data=[])
@@ -229,8 +216,7 @@ def return_dashboard(n_clicks, time_value, ticker):
     return stock_name, stock_ticker, stock_price, stock_target_price, \
     stock_pe_ratio, stock_peg_ratio, stock_div_yield, stockPrice_fig, stock_sector, \
     stock_industry, \
-    #news_card_one, \
-    #news_card_two, news_card_three
+    news_card_one, news_card_two, news_card_three
           
 if __name__ == '__main__':
     app.run_server(debug=True)

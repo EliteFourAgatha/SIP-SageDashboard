@@ -12,11 +12,13 @@ import dash_bootstrap_components as dbc
 from dash.dependencies import Input, Output, State
 import plotly.graph_objects as pgo
 import requests
+import finnhub
 
 import plotly.express as px
 
 import datetime
-import mplfinance
+import time
+from dateutil.relativedelta import relativedelta
 
 from Card_Layout import *
 from Dashboard_Layout import *
@@ -69,32 +71,57 @@ def return_dashboard(n_clicks, ticker):
     stock_name = overview_json.get('Name')
     stock_ticker = ticker
 
+    finnhub_client = finnhub.Client(api_key=finnhub_api_key)
+
+    # datetime object containing current date and time
+    now = datetime.now()
+    current_unix = time.mktime(now.timetuple()) * 1000
+    current_unix = int(current_unix)
+
+    grab = 1642000725
+    grab_light = 1618258721
+
+    year_ago = datetime.now() - relativedelta(years=1)
+    year_ago_unix = time.mktime(year_ago.timetuple()) * 1000
+    year_ago_unix = int(year_ago_unix)
+
+    data = finnhub_client.stock_candles(ticker, 'D', 1618258721, grab)
+
+    df = pd.DataFrame.from_dict(data, orient='index')
+    close_list = df['c'].tolist()
+    time_list = df['t'].tolist()
+
+    #dates_df = pd.to_datetime(df['t'], unit='s', origin='unix')
+
+
     #Do alpha vantage api call here for most recent month (year1month1 slice)
-    ts = TimeSeries(key=api_key, output_format='pandas')
-    data, meta_data = ts.get_intraday(symbol=ticker, interval='1min', outputsize='full')
+    #ts = TimeSeries(key=api_key, output_format='pandas')
+    #data, meta_data = ts.get_intraday(symbol=ticker, interval='1min', outputsize='full')
     
-    df = data
-    df.reset_index(inplace=True)
-    df.set_index("date", inplace=True)
+    #df = data
+    #df.reset_index(inplace=True)
+    #df.set_index("date", inplace=True)
     
-    close = df['4. close']
+    #close = df['4. close']
 
-    stockPrice_fig = dcc.Graph(
-        id='example-graph',
-        figure={
-            'data': [
-                {'x': df.index, 'y': close, 'type': 'line', 'name': ticker},
-            ],
-            'layout':{
-                'title': ticker
-            }
-        }
-    )
+    df = df.sort_values(by="t")
 
-    stockPrice_fig.update_yaxes(tickprefix='$', tickformat=',.2f', nticks=5)
-    stockPrice_fig.update_xaxes(ticks="outside", tickwidth=2, tickcolor='black', ticklen=10)
+    stock_test = pgo.Figure(data=[pgo.Scatter(x = close_list, y = time_list)])
 
-    return stockPrice_fig
+    pxline_text = px.line(df, x = "t", y = "c")
+
+    #stockPrice_fig = pgo.Figure(data=[dcc.Graph(
+        #figure={
+            #'data': [
+               # {'x': df['t'], 'y': df['c'], 'type': 'line', 'name': ticker},
+           # ],
+       #     'layout':{
+       #         'title': ticker
+     #       }
+    #    }
+#    )
+
+    return pxline_text
 
           
 if __name__ == '__main__':

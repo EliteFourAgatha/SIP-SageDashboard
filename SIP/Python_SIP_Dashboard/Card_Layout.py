@@ -39,7 +39,7 @@ def return_industry_card():
 def return_peRatio_card():
     card = dbc.Card([
                 dbc.CardHeader([
-                    html.H6("Price/Earnings (P/E) Ratio",
+                    html.H6("Price / Earnings-to-growth Ratio",
                         style={'fontSize':'12', 'text-align':'center'})
                 ]),
                 dbc.CardBody([

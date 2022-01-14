@@ -81,9 +81,9 @@ app.layout = html.Div(
                 Output('news-card-three', 'children'), #Industry
                 [Input('ticker-input-button', 'n_clicks')],
                 [State('ticker-input-searchbar', 'value')],
-                [State('time-interval-radio', 'value')])
+                prevent_initial_call = True)
 
-def return_dashboard(n_clicks, ticker, time_value):
+def return_dashboard(n_clicks, ticker):
 
     #try:
     #Company Overview call to populate table and headers
@@ -99,25 +99,27 @@ def return_dashboard(n_clicks, ticker, time_value):
     stock_sector = overview_json.get('Sector')
     stock_industry = overview_json.get('Industry')
 
-    #News module
-    news_response = requests.get('https://newsapi.org/v2/top-headlines?q='+str(stock_name)+'?sources="motley-fool, marketwatch"&apiKey=' + api_key)
-    pretty_news_response = json.dumps(news_response.json(), indent=4)
-    news_json = json.dumps(news_response.json())
-    news_dict = json.loads(news_json)
+    news_client = NewsApiClient(api_key=news_api)
+    news_dict = news_client.get_everything(qintitle=ticker, language="en")
 
-    card_list = []
+    artOne_title = news_dict['articles'][0]['title']
+    artOne_desc = news_dict['articles'][0]['description']
+    artOne_url = news_dict['articles'][0]['url']
+    artOne_urlImage = news_dict['articles'][0]['urlToImage']
 
-    #Iterate through first 3 articles in news_dict
-    for artIndex in news_dict['articles'][:3]:
-        card = return_news_card_test(news_dict['articles'][artIndex]['title'], 
-            news_dict['articles'][artIndex]['description'],
-            news_dict['articles'][artIndex]['url'],
-            news_dict['articles'][artIndex]['urlToImage'])
-        card_list.append(card)
-    
-    news_card_one = card_list[0]
-    news_card_two = card_list[1]
-    news_card_three = card_list[2]
+    artTwo_title = news_dict['articles'][1]['title']
+    artTwo_desc = news_dict['articles'][1]['description']
+    artTwo_url = news_dict['articles'][1]['url']
+    artTwo_urlImage = news_dict['articles'][1]['urlToImage']
+
+    artThree_title = news_dict['articles'][2]['title']
+    artThree_desc = news_dict['articles'][2]['description']
+    artThree_url = news_dict['articles'][2]['url']
+    artThree_urlImage = news_dict['articles'][2]['urlToImage']
+
+    news_card_one = return_news_card_test(artOne_title, artOne_desc, artOne_url, artOne_urlImage)
+    news_card_two = return_news_card_test(artTwo_title, artTwo_desc, artTwo_url, artTwo_urlImage)
+    news_card_three = return_news_card_test(artThree_title, artThree_desc, artThree_url, artThree_urlImage)
 
     #beta_dict = return_industry_dict(ticker, stock_sector, stock_industry)
 
@@ -125,41 +127,7 @@ def return_dashboard(n_clicks, ticker, time_value):
     bar_fig = px.bar(data_frame=beta_dict, x='symbols', y='betas')
 
 
-    if time_value == '1mo':
-        #Do alpha vantage api call here for most recent month (year1month1 slice)
-        ts = TimeSeries(key=api_key, output_format='csv')
-        data = ts.get_daily_adjusted(symbol=ticker)
-        
-        #csv --> dataframe
-        df = pd.DataFrame(list(data[0]))
-        #set index column name
-        df.index.name = 'date'
-        # Use drop and tail to remove from dataframe
-        #  (compact = 100 data points, only need 30 for 1-month query.
-        #   (Drop 77 instead of 70 to account for weekends.)
-        df.drop(df.tail(77).index, inplace=True)
-
-        stock_name = 'success_name1'
-
-        fig = pgo.Figure()
-        fig.add_trace(pgo.Scatter(x=df[0], y=df[4], fill='tonexty'))
-
-
-
-        fig.update_layout(yaxis_tickprefix='$', yaxis_tickformat=',.2f')
-
-        # Get current date and set far-right x-axis marker. (October 21.)
-        # Then, use datetime to calculate the date (1-month) ago, and set far-left x-axis marker
-        # Do same for other dates (6-month, ytd, etc.)
-        current_date = datetime.now()
-        month_ago_date = current_date - relativedelta(month=1)
-        #tick0 is first x-axis tick, dtick is interval between ticks (M1 = 1 month)
-        fig.update_xaxes(tick0=month_ago_date, dtick='M1', tickmode='linear')
-
-    else:
-        stock_name = 'error1'
-        fig = pgo.Figure(data=[])
-    return stock_name, ticker, bar_fig, \
+    return stock_name, ticker, \
             news_card_one, news_card_two, news_card_three
 
 
