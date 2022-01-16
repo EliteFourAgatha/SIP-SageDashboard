@@ -27,6 +27,7 @@ from Keys1 import *
 
 #Initialize Dash App
 app = dash.Dash(__name__, external_stylesheets=[dbc.themes.DARKLY])
+app.config.suppress_callback_exceptions = True
 
 api_key = alpha_vantage_api_key
 api_url = "https://www.alphavantage.co/query?function="
@@ -41,49 +42,23 @@ app.layout = html.Div(
        dbc.Row(
            [
                dbc.Col(
-                   #Basic info (name, price, sector, industry)
                    html.Div(
                        [
-                            html.H3(id='stock-name'),
-                            html.H3(id='stock-ticker'),
-                            html.H3(id='stock-price'),
-                            html.H3(id='stock-analyst-price'),
-                            return_sector_card(),
-                            return_industry_card(),
-                       ]), 
-                    width=5),
+                            # Basic info card (name, price, etc.)
+                            return_basic_info_card(),
+                            # Metrics with links
+                            return_peRatio_with_hover(),
+                            return_peGRatio_with_hover(),
+                            return_divYield_with_hover(),
+                       ]), width=5), # End col
                 dbc.Col(
                    [
-                       #Radio time buttons + Main graph
+                        # Time radio buttons
                         return_timeinterval(),
-                        dcc.Graph(id='stock-price-graph',
-                        style={}), #Main Chart
-                   ],
-                    width=7)
+                        # Main price graph
+                        dcc.Graph(id='stock-price-graph')
+                   ], width=7) # End col
             ]
-       ),
-       #Row of cards
-       dbc.Row(
-           [
-                dbc.Col(
-                    return_peRatio_card(),
-                    width=2),
-                dbc.Col(
-                    return_peGRatio_card(),
-                    width=2),
-                dbc.Col(
-                    return_divYield_card(),
-                    width=2),
-                dbc.Col(
-                    return_metric_card(),
-                    width=2),
-                dbc.Col(
-                    return_metric_card(),
-                    width=2),
-                dbc.Col(
-                    return_metric_card(),
-                    width=2),
-           ]
        ),
        dbc.Row(
            [
@@ -122,9 +97,9 @@ app.layout = html.Div(
                 Output('stock-ticker', 'children'), # Stock Ticker
                 Output('stock-price', 'children'), # Current stock price
                 Output('stock-analyst-price', 'children'), # Analyst stock price
-                Output('stock-pe-ratio', 'children'), # P/E Ratio
-                Output('stock-peg-ratio', 'children'), # (P/E)/Growth Ratio
-                Output('stock-div-yield', 'children'), # Dividend yield %
+                Output('pe-ratio-test', 'children'), # P/E Ratio
+                Output('peg-ratio-test', 'children'), # (P/E)/Growth Ratio
+                Output('div-yield-test', 'children'), # Dividend yield %
                 Output('stock-price-graph', 'figure'), # Price chart figure
                 Output('stock-sector', 'children'), # Sector
                 Output('stock-industry', 'children'), #Industry
@@ -183,7 +158,7 @@ def return_dashboard(n_clicks, time_value, ticker):
     stock_dividend_yield = overview_json.get('DividendYield')
     stock_yearly_high = overview_json.get('52WeekHigh')     #Make this green
     stock_yearly_low = overview_json.get('52WeekLow')    #Make this red
-    stock_target_price = 'Analyst target:' + str(overview_json.get('AnalystTargetPrice'))
+    stock_target_price = 'Analyst target: ' + str(overview_json.get('AnalystTargetPrice'))
 
     if time_value == '1mo':
         #Do alpha vantage api call here for most recent month (year1month1 slice)
@@ -214,7 +189,8 @@ def return_dashboard(n_clicks, time_value, ticker):
 
     #Return these values to output, in order
     return stock_name, stock_ticker, stock_price, stock_target_price, \
-    stock_pe_ratio, stock_peg_ratio, stock_div_yield, stockPrice_fig, stock_sector, \
+    stock_pe_ratio, stock_peg_ratio, stock_div_yield, stockPrice_fig, \
+    stock_sector, \
     stock_industry, \
     news_card_one, news_card_two, news_card_three
           

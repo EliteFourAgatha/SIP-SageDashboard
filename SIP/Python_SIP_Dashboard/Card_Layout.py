@@ -15,87 +15,129 @@ peRatio_Link = "https://www.forbes.com/advisor/investing/what-is-pe-price-earnin
 divYield_Link = "https://www.simplysafedividends.com/intelligent-income/posts/1071-dividend-yield-guide-definition-formula-examples-risks"
 peGRatio_Link = "https://www.investopedia.com/ask/answers/012715/what-considered-good-peg-price-earnings-growth-ratio.asp"
 
-# Sector & Industry Cards
-def return_sector_card():
+# Basic info card
+def return_basic_info_card():
     card = dbc.Card([
-            dbc.CardHeader("Sector",
-                style={'text-align':'center'}),
-            dbc.CardBody(html.H2(className="card-title", id='stock-sector',
-                style={'color': 'white', 'fontSize': '12'}))
-    ])
-    return card
-
-def return_industry_card():
-    card = dbc.Card([
-            dbc.CardHeader("Industry",
-                style={'text-align':'center'}),
-            dbc.CardBody(html.H3(className="card-title", id='stock-industry',
-                style={'color': 'white', 'fontSize': '11'}))
-    ])
-    return card
-
-# Main metric cards
-
-def return_peRatio_card():
-    card = dbc.Card([
-                dbc.CardHeader([
-                    html.H6("Price / Earnings-to-growth Ratio",
-                        style={'fontSize':'12', 'text-align':'center'})
-                ]),
-                dbc.CardBody([
-                    html.H5(id='stock-pe-ratio',
-                        style={'color': 'white', 'fontSize': '16', 'text-align':'center'}),
-                    #Open url in new tab (target blank)
-                    html.A(["P/E Ratio", html.Br(), "in-depth"], href=peRatio_Link, target="_blank")
-                ])
-            ])
-    return card
-
-def return_peGRatio_card():
-    card = dbc.Card([
-                dbc.CardHeader([
-                    html.H6("Price / Earnings-to-growth Ratio",
-                        style={'fontSize':'12', 'text-align':'center'})
-                ]),
-                dbc.CardBody([
-                    html.H5(id='stock-peg-ratio',
-                        style={'color': 'white', 'fontSize': '16', 'text-align':'center'}),
-                    #Open url in new tab (target blank)
-                    html.A(["PEG Ratio", html.Br(), "in-depth"], href=peGRatio_Link, target="_blank")
-                ])
-            ])
-    return card
-
-def return_divYield_card():
-    card = dbc.Card([
-                dbc.CardHeader([
-                    html.H6("Dividend Yield (%)",
-                        style={'fontSize':'12', 'text-align':'center'})
-                ]),
-                dbc.CardBody([
-                    html.H5(id='stock-div-yield',
-                        style={'color': 'white', 'fontSize': '16', 'text-align':'center'}),
-                    #Open url in new tab (target blank)
-                    html.A(["Dividend Yield", html.Br(), "in-depth"], href=divYield_Link, target="_blank",
-                        style={'width':'100%', 'display': 'flex', 'align-items':'center', 'justify-content':'center'})
-                ])
-            ])
-    return card
-
-def return_metric_card():
-    card = dbc.Card([
-            dbc.CardHeader([
-                html.H6("_______",
-                    style={'fontSize':'12', 'text-align':'center'})
-            ]),
+            dbc.CardHeader("",
+            id="stock-name",
+            style={'text-align':'center'}),
             dbc.CardBody([
-                html.H5(
-                    style={'color': 'white', 'fontSize': '16', 'text-align':'center'}),
-                #Open url in new tab (target blank)
-                html.A("______ in-depth", href=divYield_Link, target="_blank")
+                html.Div([
+                    dbc.Row([
+                        dbc.Col(
+                            html.H6(id='stock-ticker'),
+                                ),
+                        dbc.Col(
+                            html.H6(id='stock-price'),
+                                )                             
+                            ]),
+                    dbc.Row([
+                        dbc.Col(
+                            html.H6(id="stock-analyst-price")
+                        ),
+                    dbc.Row([
+                        dbc.Col(
+                            html.H6(id="stock-sector")
+                        ),
+                    dbc.Row([
+                        dbc.Col(
+                            html.H6(id="stock-industry")
+                        ),
+                        ])
+                    ]),
+                ]),
             ])
         ])
+    ])
     return card
+# End basic info card
+
+# Main metric functions
+def return_peRatio_with_hover():
+    div = html.Div([
+        dbc.Row([
+            dbc.Col([
+                html.P([
+                        html.A(
+                            "P/E Ratio: ",
+                            id="pe-ratio-anchor",
+                            href=peRatio_Link,
+                            target="_blank",
+                            style={"textDecoration": "underline", "cursor": "pointer", "text-align": "left"},
+                        )
+                ]), #End html.P
+            dbc.Tooltip(
+            "Basic explanation of pe goes here",
+            target="pe-ratio-anchor"
+                )
+            ], className="col-md-3",), #End dbc.Col
+            dbc.Col([
+                html.P(
+                    "",
+                    id="pe-ratio-test",
+                    style={'color': 'white', 'fontSize': '16', 'text-align':'left'})
+            ], className="col-md-1")
+        ]) #End dbc.Row
+    ]) #End html.Div
+    return div
+
+def return_peGRatio_with_hover():
+    div = html.Div([
+        dbc.Row([
+            dbc.Col([
+                html.P([
+                        html.A(
+                            "PEG Ratio: ",
+                            id="peg-ratio-anchor",
+                            href=peGRatio_Link,
+                            target="_blank",
+                            style={"textDecoration": "underline", "cursor": "pointer", "text-align": "left"},
+                        )
+                ]), #End html.P
+            dbc.Tooltip(
+            "Basic explanation of peg goes here",
+            target="peg-ratio-anchor"
+                )
+            ], className="col-md-3",), #End dbc.Col
+            dbc.Col([
+                html.P(
+                    "",
+                    id="peg-ratio-test",
+                    style={'color': 'white', 'fontSize': '16', 'text-align':'left'})
+            ], className="col-md-1")
+        ]) #End dbc.Row
+    ]) #End html.Div
+    return div
+
+def return_divYield_with_hover():
+    div = html.Div([
+        dbc.Row([
+            dbc.Col([
+                html.P([
+                        html.A(
+                            "Div Yield: ",
+                            id="div-yield-ratio-anchor",
+                            href=divYield_Link,
+                            target="_blank",
+                            style={"textDecoration": "underline", "cursor": "pointer", "text-align": "left"},
+                        )
+                ]), #End html.P
+            dbc.Tooltip(
+            "Basic explanation of div yield goes here",
+            target="div-yield-ratio-anchor"
+                )
+            ], className="col-md-3",), #End dbc.Col
+            dbc.Col([
+                html.P(
+                    "",
+                    id="div-yield-test",
+                    style={'color': 'white', 'fontSize': '16', 'text-align':'left'})
+            ], className="col-md-1")
+        ]) #End dbc.Row
+    ]) #End html.Div
+    return div
+
+# End metric cards
 
 # News cards
 def return_news_card(image_source_url, news_title, news_description, news_url):
@@ -103,7 +145,7 @@ def return_news_card(image_source_url, news_title, news_description, news_url):
     card = dbc.CardGroup(
         [
             dbc.Card(
-                html.Img(src=image_source_url), #URL Image
+                html.Img(src=image_source_url, alt="Picture failed to load.."), #URL Image
             ),
             dbc.Card(
                 dbc.CardBody(
@@ -157,10 +199,6 @@ def return_news_card_test(news_title, news_description, news_url, image_source_u
 
     return card
 
-def return_emptyNewsCard():
-    card = html.Div()
-    return card
-
 def return_noNewsCard():
     card = dbc.Card(
     [
@@ -185,3 +223,4 @@ def return_noNewsCard():
     #style={"maxWidth": "540px"},
     )
     return card
+# End news cards
