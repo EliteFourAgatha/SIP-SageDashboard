@@ -14,6 +14,7 @@ from dash.dependencies import Input, Output
 peRatio_Link = "https://www.forbes.com/advisor/investing/what-is-pe-price-earnings-ratio/"
 divYield_Link = "https://www.simplysafedividends.com/intelligent-income/posts/1071-dividend-yield-guide-definition-formula-examples-risks"
 peGRatio_Link = "https://www.investopedia.com/ask/answers/012715/what-considered-good-peg-price-earnings-growth-ratio.asp"
+priceToBook_Link = "https://www.businessinsider.com/what-is-price-to-book-ratio"
 
 # Basic info card
 def return_basic_info_card():
@@ -53,6 +54,34 @@ def return_basic_info_card():
 # End basic info card
 
 # Main metric functions
+def return_ebitda_with_hover():
+    div = html.Div([
+        dbc.Row([
+            dbc.Col([
+                html.P([
+                        html.A(
+                            "EBITDA: ",
+                            id="ebitda-ratio-anchor",
+                            href=peRatio_Link,
+                            target="_blank",
+                            style={"textDecoration": "underline", "cursor": "pointer", "text-align": "left"},
+                        )
+                ]), #End html.P
+            dbc.Tooltip(
+            "Basic explanation of pe goes here",
+            target="ebitda-ratio-anchor"
+                )
+            ], className="col-md-3",), #End dbc.Col
+            dbc.Col([
+                html.P(
+                    "",
+                    id="ebitda-test",
+                    style={'color': 'white', 'fontSize': '16', 'text-align':'left'})
+            ], className="col-md-1")
+        ]) #End dbc.Row
+    ]) #End html.Div
+    return div
+
 def return_peRatio_with_hover():
     div = html.Div([
         dbc.Row([
@@ -131,6 +160,33 @@ def return_divYield_with_hover():
                 html.P(
                     "",
                     id="div-yield-test",
+                    style={'color': 'white', 'fontSize': '16', 'text-align':'left'})
+            ], className="col-md-1")
+        ]) #End dbc.Row
+    ]) #End html.Div
+    return div
+def return_price_to_book_with_hover():
+    div = html.Div([
+        dbc.Row([
+            dbc.Col([
+                html.P([
+                        html.A(
+                            "Price-to-Book Ratio: ",
+                            id="price-book-ratio-anchor",
+                            href=priceToBook_Link,
+                            target="_blank",
+                            style={"textDecoration": "underline", "cursor": "pointer", "text-align": "left"},
+                        )
+                ]), #End html.P
+            dbc.Tooltip(
+            "Basic explanation of price to book goes here",
+            target="price-book-ratio-anchor"
+                )
+            ], className="col-md-3",), #End dbc.Col
+            dbc.Col([
+                html.P(
+                    "",
+                    id="price-book-test",
                     style={'color': 'white', 'fontSize': '16', 'text-align':'left'})
             ], className="col-md-1")
         ]) #End dbc.Row

@@ -46,10 +46,20 @@ app.layout = html.Div(
                        [
                             # Basic info card (name, price, etc.)
                             return_basic_info_card(),
+
                             # Metrics with links
-                            return_peRatio_with_hover(),
-                            return_peGRatio_with_hover(),
-                            return_divYield_with_hover(),
+                            dbc.Row([
+                                dbc.Col([
+                                    return_ebitda_with_hover(),
+                                    return_peRatio_with_hover(),
+                                    return_peGRatio_with_hover(),
+                                ]),
+                                dbc.Col([
+                                    return_peRatio_with_hover(),
+                                    return_peGRatio_with_hover(),
+                                    return_divYield_with_hover(),
+                                ])
+                            ])
                        ]), width=5), # End col
                 dbc.Col(
                    [
@@ -97,6 +107,8 @@ app.layout = html.Div(
                 Output('stock-ticker', 'children'), # Stock Ticker
                 Output('stock-price', 'children'), # Current stock price
                 Output('stock-analyst-price', 'children'), # Analyst stock price
+                Output('price-book-test', 'children'), # Price-to-Book Ratio
+                Output('ebitda-test', 'children'), # EBITDA
                 Output('pe-ratio-test', 'children'), # P/E Ratio
                 Output('peg-ratio-test', 'children'), # (P/E)/Growth Ratio
                 Output('div-yield-test', 'children'), # Dividend yield %
@@ -155,7 +167,7 @@ def return_dashboard(n_clicks, time_value, ticker):
 
     #Currently unused, use for cards
     stock_ebitda = overview_json.get('EBITDA')
-    stock_dividend_yield = overview_json.get('DividendYield')
+    stock_priceBookRatio = overview_json.get('PriceToBookRatio')
     stock_yearly_high = overview_json.get('52WeekHigh')     #Make this green
     stock_yearly_low = overview_json.get('52WeekLow')    #Make this red
     stock_target_price = 'Analyst target: ' + str(overview_json.get('AnalystTargetPrice'))
@@ -189,6 +201,7 @@ def return_dashboard(n_clicks, time_value, ticker):
 
     #Return these values to output, in order
     return stock_name, stock_ticker, stock_price, stock_target_price, \
+    stock_ebitda, stock_priceBookRatio, \
     stock_pe_ratio, stock_peg_ratio, stock_div_yield, stockPrice_fig, \
     stock_sector, \
     stock_industry, \
