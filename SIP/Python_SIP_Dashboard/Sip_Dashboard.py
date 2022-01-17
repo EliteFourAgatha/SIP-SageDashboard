@@ -39,6 +39,7 @@ app.layout = html.Div(
     [
        dbc.Row(dbc.Col(html.H2('Stock Dashboard', style={'text-align':'center'}))),
        dbc.Row(dbc.Col(html.Div(return_input_bar(), style={'margin':'auto'}))),
+       dbc.Row(),
        dbc.Row(
            [
                dbc.Col(
@@ -55,19 +56,20 @@ app.layout = html.Div(
                                     return_peGRatio_with_hover(),
                                 ]),
                                 dbc.Col([
-                                    return_peRatio_with_hover(),
-                                    return_peGRatio_with_hover(),
+                                    return_price_to_book_with_hover(),
                                     return_divYield_with_hover(),
                                 ])
                             ])
-                       ]), width=5), # End col
+                       ]), width=6), # End col
                 dbc.Col(
                    [
                         # Time radio buttons
                         return_timeinterval(),
                         # Main price graph
-                        dcc.Graph(id='stock-price-graph')
-                   ], width=7) # End col
+                        dcc.Graph(id='stock-price-graph',
+                            style={"width":"100%", "height":"80%"},
+                            config={'displayModeBar': False})
+                   ], width=6) # End col
             ]
        ),
        dbc.Row(
@@ -78,34 +80,23 @@ app.layout = html.Div(
                         html.Div(id='news-card-one'),
                         html.Div(id='news-card-two'),
                         html.Div(id='news-card-three')
-                    ]),
-                width=8),
+                    ]), width=8),
                 #Beta/industry graph
                 dbc.Col(
-                    dcc.Graph(id='bar-graph',
-                    figure={
-                        'data': [
-                            {'x': [1], 'y': [1.3], 'type': 'bar', 'name': 'Chosen Stock'},
-                            {'x': [1], 'y': [1], 'type': 'bar', 'name': 'S&P Index'},
-                            {'x': [1], 'y': [0.2], 'type': 'bar', 'name': 'Stock2'},
-                            {'x': [1], 'y': [-0.5], 'type': 'bar', 'name': 'Stock5'},
-                            {'x': [1], 'y': [0.4], 'type': 'bar', 'name': 'Stock3'},
-                            {'x': [1], 'y': [1.3], 'type': 'bar', 'name': 'Stock6'},
-                            ],
-                        'layout': {'title': 'Beta'}
-                    }),
-                    width=4),
-           ]
-       )
+                    [
+                        dcc.Graph(id='bar-graph',
+                            config={'displayModeBar': False}),
+                        dcc.Graph(id='volume-graph',
+                            config={'displayModeBar': False})
+                    ], width=4), #End col
+            ]) #End row
     ]
 )           
 
 #Input: State of time radio bar and searchbar (value entered)
 # Called: When input button is pressed
 #  Returns: Table, graph, and general info
-@app.callback(Output('stock-name', 'children'), # Stock Name
-                Output('stock-ticker', 'children'), # Stock Ticker
-                Output('stock-price', 'children'), # Current stock price
+@app.callback(Output('stock-name-and-ticker', 'children'), # Stock Name & (Ticker)
                 Output('stock-analyst-price', 'children'), # Analyst stock price
                 Output('price-book-test', 'children'), # Price-to-Book Ratio
                 Output('ebitda-test', 'children'), # EBITDA
@@ -113,6 +104,8 @@ app.layout = html.Div(
                 Output('peg-ratio-test', 'children'), # (P/E)/Growth Ratio
                 Output('div-yield-test', 'children'), # Dividend yield %
                 Output('stock-price-graph', 'figure'), # Price chart figure
+                Output('bar-graph', 'figure'), # Price chart figure
+                Output('volume-graph', 'figure'), # Price chart figure
                 Output('stock-sector', 'children'), # Sector
                 Output('stock-industry', 'children'), #Industry
                 Output('news-card-one', 'children'), #Industry
@@ -133,8 +126,10 @@ def return_dashboard(n_clicks, time_value, ticker):
     overview_json = overview_response.json()#Maybe redundant, might be able return data in json form already
 
     #Basic stock info (top left of layout)
-    stock_name = overview_json.get('Name')
-    stock_ticker = ticker
+    name_ticker_and_price = str(overview_json.get('Name')) + " (" + ticker + ")" + "    " + "CurrentPrice"
+    stock_sector = 'Sector: ' + overview_json.get('Sector')
+    stock_industry = 'Industry: ' + overview_json.get('Industry')
+    stock_target_price = 'Analyst target: ' + str(overview_json.get('AnalystTargetPrice'))
 
     news_client = NewsApiClient(api_key=news_api)
     news_dict = news_client.get_everything(qintitle=ticker, language="en")
@@ -158,19 +153,15 @@ def return_dashboard(n_clicks, time_value, ticker):
     news_card_two = return_news_card_test(artTwo_title, artTwo_desc, artTwo_url, artTwo_urlImage)
     news_card_three = return_news_card_test(artThree_title, artThree_desc, artThree_url, artThree_urlImage) 
 
-    #Card info
+    # Explained Metrics
     stock_pe_ratio = overview_json.get('PERatio')
     stock_peg_ratio = overview_json.get('PEGRatio')
     stock_div_yield = overview_json.get('DividendYield')
-    stock_sector = overview_json.get('Sector')
-    stock_industry = overview_json.get('Industry')
-
-    #Currently unused, use for cards
     stock_ebitda = overview_json.get('EBITDA')
     stock_priceBookRatio = overview_json.get('PriceToBookRatio')
+
     stock_yearly_high = overview_json.get('52WeekHigh')     #Make this green
     stock_yearly_low = overview_json.get('52WeekLow')    #Make this red
-    stock_target_price = 'Analyst target: ' + str(overview_json.get('AnalystTargetPrice'))
 
     if time_value == '1mo':
         #Do alpha vantage api call here for most recent month (year1month1 slice)
@@ -181,28 +172,31 @@ def return_dashboard(n_clicks, time_value, ticker):
         df = pd.DataFrame(list(data[0]))
         #set index column name
         df.index.name = 'date'
+
+        stockBar_fig = return_bar_graph()
+        stockVolume_fig = return_volume_graph()
         
         stockPrice_fig = pgo.Figure()
-        #df[0] is date column, df[4] is close column
+        
         stockPrice_fig.add_trace(pgo.Scatter(x=df[0], y=df[4]))
 
         stockPrice_fig.update_yaxes(tickprefix='$', tickformat=',.2f', nticks=5)
         stockPrice_fig.update_xaxes(ticks="outside", tickwidth=2, tickcolor='black', ticklen=10)
     
     else:
-        stock_name = ''
         stockPrice_fig = pgo.Figure(data=[])
-
-    stock_price = 'current_stock_price'
+        stockBar_fig = pgo.Figure(data=[])
+        stockVolume_fig = pgo.Figure(data=[])
 
     #Industry comparison module
     #Used to determine which exchange stock is in for industry comparison
     exchange = overview_json.get('Exchange')
 
     #Return these values to output, in order
-    return stock_name, stock_ticker, stock_price, stock_target_price, \
-    stock_ebitda, stock_priceBookRatio, \
-    stock_pe_ratio, stock_peg_ratio, stock_div_yield, stockPrice_fig, \
+    return name_ticker_and_price, stock_target_price, \
+    stock_priceBookRatio, stock_ebitda,  \
+    stock_pe_ratio, stock_peg_ratio, stock_div_yield, \
+    stockPrice_fig, stockBar_fig, stockVolume_fig, \
     stock_sector, \
     stock_industry, \
     news_card_one, news_card_two, news_card_three

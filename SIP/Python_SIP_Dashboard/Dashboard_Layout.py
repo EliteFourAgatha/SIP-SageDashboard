@@ -54,6 +54,31 @@ def return_timeinterval():
                         style={'text-align':'center'})
     return layout
 
+def return_bar_graph():
+    figure={
+    'data': [
+        {'x': [1], 'y': [1.3], 'type': 'bar', 'name': 'Chosen Stock'},
+        {'x': [1], 'y': [1], 'type': 'bar', 'name': 'S&P Index'},
+        {'x': [1], 'y': [0.2], 'type': 'bar', 'name': 'Stock2'},
+        {'x': [1], 'y': [-0.5], 'type': 'bar', 'name': 'Stock5'},
+        {'x': [1], 'y': [0.4], 'type': 'bar', 'name': 'Stock3'},
+        {'x': [1], 'y': [1.3], 'type': 'bar', 'name': 'Stock6'},
+        ],
+    'layout': {'title': 'Beta', 'y': ''}
+    }
+    return figure
+
+
+def return_volume_graph():
+    figure = pgo.Figure(
+            data=[pgo.Scatter(
+                x=[1, 3.2, 5.4, 7.6, 9.8, 12.5],
+                y=[1, 3.2, 5.4, 7.6, 9.8, 12.5],
+                mode='markers')
+            ],
+            layout={'title':'Volume Graph'})
+    return figure
+
 
 def return_industry_dict(ticker, sector, industry):
     exchange = 'NYSE'

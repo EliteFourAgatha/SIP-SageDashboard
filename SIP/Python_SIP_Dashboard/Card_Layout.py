@@ -20,8 +20,8 @@ priceToBook_Link = "https://www.businessinsider.com/what-is-price-to-book-ratio"
 def return_basic_info_card():
     card = dbc.Card([
             dbc.CardHeader("",
-            id="stock-name",
-            style={'text-align':'center'}),
+                id="stock-name-and-ticker",
+                style={'text-align':'center'}),
             dbc.CardBody([
                 html.Div([
                     dbc.Row([
@@ -68,10 +68,10 @@ def return_ebitda_with_hover():
                         )
                 ]), #End html.P
             dbc.Tooltip(
-            "Basic explanation of pe goes here",
+            "Basic explanation of ebitda goes here",
             target="ebitda-ratio-anchor"
                 )
-            ], className="col-md-3",), #End dbc.Col
+            ], className="col-md-5",), #End dbc.Col
             dbc.Col([
                 html.P(
                     "",
@@ -99,7 +99,7 @@ def return_peRatio_with_hover():
             "Basic explanation of pe goes here",
             target="pe-ratio-anchor"
                 )
-            ], className="col-md-3",), #End dbc.Col
+            ], className="col-md-5",), #End dbc.Col
             dbc.Col([
                 html.P(
                     "",
@@ -127,7 +127,7 @@ def return_peGRatio_with_hover():
             "Basic explanation of peg goes here",
             target="peg-ratio-anchor"
                 )
-            ], className="col-md-3",), #End dbc.Col
+            ], className="col-md-5",), #End dbc.Col
             dbc.Col([
                 html.P(
                     "",
@@ -155,7 +155,7 @@ def return_divYield_with_hover():
             "Basic explanation of div yield goes here",
             target="div-yield-ratio-anchor"
                 )
-            ], className="col-md-3",), #End dbc.Col
+            ], className="col-md-5",), #End dbc.Col
             dbc.Col([
                 html.P(
                     "",
@@ -182,7 +182,7 @@ def return_price_to_book_with_hover():
             "Basic explanation of price to book goes here",
             target="price-book-ratio-anchor"
                 )
-            ], className="col-md-3",), #End dbc.Col
+            ], className="col-md-5",), #End dbc.Col
             dbc.Col([
                 html.P(
                     "",
@@ -254,29 +254,3 @@ def return_news_card_test(news_title, news_description, news_url, image_source_u
     )
 
     return card
-
-def return_noNewsCard():
-    card = dbc.Card(
-    [
-        dbc.Row(
-            [
-                dbc.Col(
-                    className="col-md-4",
-                ),
-                dbc.Col(
-                    dbc.CardBody(
-                        [
-                            html.H1('No breaking news')
-                        ]
-                    ),
-                    className="col-md-8",
-                ),
-            ],
-            className="g-0 d-flex align-items-center",
-        )
-    ],
-    className="mb-3",
-    #style={"maxWidth": "540px"},
-    )
-    return card
-# End news cards
