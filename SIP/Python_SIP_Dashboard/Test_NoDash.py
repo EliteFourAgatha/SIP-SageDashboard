@@ -40,38 +40,6 @@ news_api = '8ea69eabd7074f14a977d2f1541498f4'
 
 stock_name = 'Facebook'
 
-#News module
-news_response = requests.get('https://newsapi.org/v2/top-headlines?q='+str(stock_name)+'?sources="motley-fool, marketwatch"&apiKey=' + api_key)
-pretty_news_response = json.dumps(news_response.json(), indent=4)
-news_json = json.dumps(news_response.json())
-news_dict = json.loads(news_json)
-
-news_client = NewsApiClient(api_key=news_api)
-dict_test = news_client.get_top_headlines(q=stock_name)
-
-card_list = []
-
-artOne_title = dict_test['articles'][0]['title']
-artOne_desc = dict_test['articles'][0]['description']
-artOne_url = dict_test['articles'][0]['url']
-artOne_urlImage = dict_test['articles'][0]['urlToImage']
-
-artTwo_title = dict_test['articles'][1]['title']
-artTwo_desc = dict_test['articles'][1]['description']
-artTwo_url = dict_test['articles'][1]['url']
-artTwo_urlImage = dict_test['articles'][1]['urlToImage']
-
-artThree_title = dict_test['articles'][2]['title']
-artThree_desc = dict_test['articles'][2]['description']
-artThree_url = dict_test['articles'][2]['url']
-artThree_urlImage = dict_test['articles'][2]['urlToImage']
-
-news_card_one = return_news_card_test(artOne_title, artOne_desc, artOne_url, artOne_urlImage)
-news_card_two = return_news_card_test(artTwo_title, artTwo_desc, artTwo_url, artTwo_urlImage)
-news_card_three = return_news_card_test(artThree_title, artThree_desc, artThree_url, artThree_urlImage)
-
-print(dict_test)
-
 # datetime object containing current date and time
 now = datetime.now()
 nowUnixValue = time.mktime(now.timetuple()) * 1000
