@@ -60,7 +60,8 @@ app.layout = html.Div(
 
 @app.callback(Output('stock-graph', 'figure'), # Price chart figure
                 [Input('ticker-input-button', 'n_clicks')], #Input button fires callback
-                [State('ticker-input-searchbar', 'value')]) #Take input searchbar state
+                [State('ticker-input-searchbar', 'value')],
+                prevent_initial_call = True) #Take input searchbar state
 
 def return_dashboard(n_clicks, ticker):
     
@@ -84,17 +85,29 @@ def return_dashboard(n_clicks, ticker):
     year_ago = datetime.now() - relativedelta(years=1)
     year_ago_unix = time.mktime(year_ago.timetuple()) * 1000
     year_ago_unix = int(year_ago_unix)
+    #data = finnhub_client.stock_candles(ticker, 'D', 1618258721, grab)
+    data = finnhub_client.stock_candles(ticker, 'D', 1590988249, 1591852249)
 
-    data = finnhub_client.stock_candles(ticker, 'D', 1618258721, grab)
 
-    df = pd.DataFrame.from_dict(data, orient='index')
-    close_list = df['c'].tolist()
-    time_list = df['t'].tolist()
+    #Works if you hard-code in string. Gives "scalar index" error 
+    # if ticker supplied from callback ??
+    df = pd.DataFrame.from_dict(data)
+
+    #   Need to convert 't' column from unix timecodes to dates
+
+
+
+
+
+    #df = pd.DataFrame.from_dict(data, orient='index')
+    #close_list = df['c'].tolist()
+    #time_list = df['t'].tolist()
 
     #dates_df = pd.to_datetime(df['t'], unit='s', origin='unix')
+    df2 = px.data.gapminder().query("continent == 'Oceania'")
 
+    fig = px.line(df, x='t', y='c')
 
-    #Do alpha vantage api call here for most recent month (year1month1 slice)
     #ts = TimeSeries(key=api_key, output_format='pandas')
     #data, meta_data = ts.get_intraday(symbol=ticker, interval='1min', outputsize='full')
     
@@ -104,11 +117,11 @@ def return_dashboard(n_clicks, ticker):
     
     #close = df['4. close']
 
-    df = df.sort_values(by="t")
+    #df = df.sort_values(by="t")
 
-    stock_test = pgo.Figure(data=[pgo.Scatter(x = close_list, y = time_list)])
+    #stock_test = pgo.Figure(data=[pgo.Scatter(x = close_list, y = time_list)])
 
-    pxline_text = px.line(df, x = "t", y = "c")
+    #pxline_text = px.line(df, x = "t", y = "c")
 
     #stockPrice_fig = pgo.Figure(data=[dcc.Graph(
         #figure={
@@ -121,7 +134,7 @@ def return_dashboard(n_clicks, ticker):
     #    }
 #    )
 
-    return pxline_text
+    return fig
 
           
 if __name__ == '__main__':

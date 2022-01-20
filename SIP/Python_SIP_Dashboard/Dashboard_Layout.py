@@ -4,6 +4,7 @@ import numpy as np
 import requests
 from datetime import datetime
 import plotly.graph_objects as pgo
+import plotly.express as px
 import dash_core_components as dcc
 import dash_html_components as html
 import dash_bootstrap_components as dbc
@@ -55,18 +56,27 @@ def return_timeinterval():
     return layout
 
 def return_bar_graph():
-    figure={
-    'data': [
-        {'x': [1], 'y': [1.3], 'type': 'bar', 'name': 'Chosen Stock'},
-        {'x': [1], 'y': [1], 'type': 'bar', 'name': 'S&P Index'},
-        {'x': [1], 'y': [0.2], 'type': 'bar', 'name': 'Stock2'},
-        {'x': [1], 'y': [-0.5], 'type': 'bar', 'name': 'Stock5'},
-        {'x': [1], 'y': [0.4], 'type': 'bar', 'name': 'Stock3'},
-        {'x': [1], 'y': [1.3], 'type': 'bar', 'name': 'Stock6'},
-        ],
-    'layout': {'title': 'Beta', 'y': ''}
-    }
+    figure = px.bar(
+            x=['Index', 'A', 'B', 'C', 'D'],
+            y=[1, 0.5, -1, 0.4, 0.7]
+        )
+    figure.update_layout(
+        #Set graph margins, remove white padding
+        margin=dict(l=25, r=25, t=25, b=25)
+    )
     return figure
+
+ #   figure={
+  #  'data': [
+  #      {'x': [1], 'y': [1.3], 'type': 'bar', 'name': 'Chosen Stock'},
+  #      {'x': [1], 'y': [1], 'type': 'bar', 'name': 'S&P Index'},
+   #     {'x': [1], 'y': [0.2], 'type': 'bar', 'name': 'Stock2'},
+   #     {'x': [1], 'y': [-0.5], 'type': 'bar', 'name': 'Stock5'},
+    #    {'x': [1], 'y': [0.4], 'type': 'bar', 'name': 'Stock3'},
+ #       {'x': [1], 'y': [1.3], 'type': 'bar', 'name': 'Stock6'},
+ #       ],
+ #   'layout': {'title': 'Beta', 'y': ''}
+ #   }
 
 
 def return_volume_graph():
@@ -74,9 +84,15 @@ def return_volume_graph():
             data=[pgo.Scatter(
                 x=[1, 3.2, 5.4, 7.6, 9.8, 12.5],
                 y=[1, 3.2, 5.4, 7.6, 9.8, 12.5],
-                mode='markers')
+                mode='markers',
+                marker_size=[8, 16, 32, 40, 50, 60])
             ],
             layout={'title':'Volume Graph'})
+    
+    figure.update_layout(
+        #Set graph margins, remove white padding
+        margin=dict(l=25, r=25, t=25, b=25)
+    )
     return figure
 
 

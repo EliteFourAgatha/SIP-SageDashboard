@@ -126,7 +126,7 @@ def return_dashboard(n_clicks, time_value, ticker):
     overview_json = overview_response.json()#Maybe redundant, might be able return data in json form already
 
     #Basic stock info (top left of layout)
-    name_ticker_and_price = str(overview_json.get('Name')) + " (" + ticker + ")" + "    " + "CurrentPrice"
+    name_ticker_and_price = str(overview_json.get('Name')) + " (" + ticker + ")" + "    " + " $CurrentPrice"
     stock_sector = 'Sector: ' + overview_json.get('Sector')
     stock_industry = 'Industry: ' + overview_json.get('Industry')
     stock_target_price = 'Analyst target: ' + str(overview_json.get('AnalystTargetPrice'))
@@ -180,6 +180,8 @@ def return_dashboard(n_clicks, time_value, ticker):
         
         stockPrice_fig.add_trace(pgo.Scatter(x=df[0], y=df[4]))
 
+        #Set graph margins, remove white padding
+        stockPrice_fig.update_layout(margin=dict(l=25, r=25, t=25, b=25))
         stockPrice_fig.update_yaxes(tickprefix='$', tickformat=',.2f', nticks=5)
         stockPrice_fig.update_xaxes(ticks="outside", tickwidth=2, tickcolor='black', ticklen=10)
     
