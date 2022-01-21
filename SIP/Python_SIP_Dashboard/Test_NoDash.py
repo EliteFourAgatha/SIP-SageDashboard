@@ -17,8 +17,9 @@ import dataprep
 from dataprep.eda import plot
 
 import calendar
-from datetime import datetime
+import datetime
 import time
+from dateutil.relativedelta import relativedelta
 
 #for iterating through newsApi cards
 import itertools
@@ -51,11 +52,26 @@ nowUnixValue = time.mktime(now.timetuple()) * 1000
 dt_string = now.strftime("%d/%m/%Y %H:%M")
 print("date and time =", dt_string)
 
+# datetime object containing current date and time
+now = datetime.now()
+now_unix = int(now.timestamp())
+
+#Works, having hard time finding month ago. 
+# Might need to convert from datetime object
+now_time = int(time.time())
+
+#month_ago_time = now_time - 
+
+
+month_ago_unix = now - relativedelta(months=1)
+month_ago_unix = int(month_ago_unix.timestamp())
+
 finnhub_client = finnhub.Client(api_key=finnhub_api_key)
 
 data = finnhub_client.stock_candles('msft', 'D', 1590988249, 1591852249)
 
-df = pd.DataFrame([data])
+df = pd.DataFrame.from_dict(data)
+df['t'] = pd.to_datetime(df['t'], unit='s')
 #plot(df)
 
 df2 = px.data.gapminder().query("continent == 'Oceania'")
@@ -63,16 +79,11 @@ df2 = px.data.gapminder().query("continent == 'Oceania'")
            #  hover_data=['lifeExp', 'gdpPercap'], color='country',
             # labels={'pop':'population of Canada'})
 
-#new_df = pd.to_datetime(df['t'], unit='s', origin='unix')
+#print(df.info(verbose=True))
+#print(df)
 
-#stock_test = pgo.Figure(data=[pgo.Scatter(x = df['c'], y = df['t'])])
-
-#pxline_text = px.line(df, x = "t", y = "c")
-#pxline_text.show()
-
-print(df.info(verbose=True))
-#print(new_df)
-
-#print(dict_test)
-#print(article_title)
+print(now_time)
+print(now_unix)
+print(month_ago_unix)
+#print(month_ago_unix)
 

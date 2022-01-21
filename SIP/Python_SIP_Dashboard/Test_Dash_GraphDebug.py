@@ -33,8 +33,6 @@ api_url = "https://www.alphavantage.co/query?function="
 
 ti = TechIndicators(key=api_key, output_format='pandas')
 
-#CONSIDER REMOVING TIME VALUE ALTOGETHER. JUST PULL DATA AND GRAPH IT.
-
 app.layout = html.Div(
     [
        dbc.Row(dbc.Col(html.H2('Stock Dashboard', style={'text-align':'center'}))),
@@ -74,28 +72,12 @@ def return_dashboard(n_clicks, ticker):
 
     finnhub_client = finnhub.Client(api_key=finnhub_api_key)
 
-    # datetime object containing current date and time
-    now = datetime.now()
-    current_unix = time.mktime(now.timetuple()) * 1000
-    current_unix = int(current_unix)
-
-    grab = 1642000725
-    grab_light = 1618258721
-
-    year_ago = datetime.now() - relativedelta(years=1)
-    year_ago_unix = time.mktime(year_ago.timetuple()) * 1000
-    year_ago_unix = int(year_ago_unix)
-    #data = finnhub_client.stock_candles(ticker, 'D', 1618258721, grab)
-    data = finnhub_client.stock_candles(ticker, 'D', 1590988249, 1591852249)
+    #data = finnhub_client.stock_candles(ticker, 'D', month_ago_unix, now_unix)
+    data = finnhub_client.stock_candles(ticker, 'D', 1640050185, 1642728585)
 
 
-    #Works if you hard-code in string. Gives "scalar index" error 
-    # if ticker supplied from callback ??
     df = pd.DataFrame.from_dict(data)
-
-    #   Need to convert 't' column from unix timecodes to dates
-
-
+    df['t'] = pd.to_datetime(df['t'], unit='s')
 
 
 
