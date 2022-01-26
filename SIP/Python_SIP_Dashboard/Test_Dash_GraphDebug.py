@@ -43,20 +43,22 @@ app.layout = html.Div(
                    html.Div(
                        [
                             html.H3(id='stock-name'),
-                            html.H3(id='stock-ticker')
+                            html.H3(id='stock-ticker'),
+                            dcc.Graph(id='volume-graph', animate=True)
                        ]), 
-                    width=4),
+                    width=6),
                 dbc.Col(
                    [
                         dcc.Graph(id='stock-graph', animate=True),
                    ],
-                    width=8)
+                    width=6)
             ]
        ),
     ]
 )           
 
 @app.callback(Output('stock-graph', 'figure'), # Price chart figure
+                Output('volume-graph', 'figure'),
                 [Input('ticker-input-button', 'n_clicks')], #Input button fires callback
                 [State('ticker-input-searchbar', 'value')],
                 prevent_initial_call = True) #Take input searchbar state
@@ -88,7 +90,9 @@ def return_dashboard(n_clicks, ticker):
     #dates_df = pd.to_datetime(df['t'], unit='s', origin='unix')
     df2 = px.data.gapminder().query("continent == 'Oceania'")
 
-    fig = px.line(df, x='t', y='c')
+    stock_fig = px.line(df, x='t', y='c')
+
+    volume_fig = return_volume_graph(df)
 
     #ts = TimeSeries(key=api_key, output_format='pandas')
     #data, meta_data = ts.get_intraday(symbol=ticker, interval='1min', outputsize='full')
@@ -116,7 +120,7 @@ def return_dashboard(n_clicks, ticker):
     #    }
 #    )
 
-    return fig
+    return stock_fig, volume_fig
 
           
 if __name__ == '__main__':

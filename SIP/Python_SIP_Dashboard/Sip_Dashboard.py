@@ -174,7 +174,7 @@ def return_dashboard(n_clicks, time_value, ticker):
         df.index.name = 'date'
 
         stockBar_fig = return_bar_graph()
-        stockVolume_fig = return_volume_graph()
+        stockVolume_fig = return_volume_graph(df)
         
         stockPrice_fig = pgo.Figure()
         

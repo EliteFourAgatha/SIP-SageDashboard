@@ -79,19 +79,42 @@ def return_bar_graph():
  #   }
 
 
-def return_volume_graph():
+def return_volume_graph(dataFrame):
+    low_volume = dataFrame['v'].min()
+    avg_volume = dataFrame['v'].mean()
+    high_volume = dataFrame['v'].max()
+    #Use low and high volumes to determine color scale size
+    # Use average volume to determine whether data is red (50% & below)
+    #  or green (above 50%)
+
     figure = pgo.Figure(
             data=[pgo.Scatter(
-                x=[1, 3.2, 5.4, 7.6, 9.8, 12.5],
-                y=[1, 3.2, 5.4, 7.6, 9.8, 12.5],
+                x=dataFrame['t'],
+                y=dataFrame['v'],
+                #x=[1, 3.2, 5.4, 7.6, 9.8, 12.5],
+                #y=[1, 3.2, 5.4, 7.6, 9.8, 12.5],
                 mode='markers',
-                marker_size=[8, 16, 32, 40, 50, 60])
+                marker=dict(
+                    size= 0.000001 * dataFrame['v'],
+                    sizemin= 3,
+                    color= [2000000, 4000000, 6000000, 8000000, 10000000],
+                    colorscale= [[0, 'red'], [1, 'green']],
+                    showscale= True)
+                )
+                #mode='markers',
+                #marker_size=[8, 16, 32, 40, 50, 60])
             ],
-            layout={'title':'Volume Graph'})
+            layout={'title':'Volume'})
     
     figure.update_layout(
         #Set graph margins, remove white padding
         margin=dict(l=25, r=25, t=25, b=25)
+    )
+    figure.update_yaxes(
+        title='Volume'
+    )
+    figure.update_xaxes(
+        title='Date'
     )
     return figure
 
