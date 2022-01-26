@@ -1,4 +1,5 @@
 from enum import auto
+from tkinter import Y
 import pandas as pd
 import numpy as np
 import requests
@@ -80,9 +81,10 @@ def return_bar_graph():
 
 
 def return_volume_graph(dataFrame):
-    low_volume = dataFrame['v'].min()
-    avg_volume = dataFrame['v'].mean()
-    high_volume = dataFrame['v'].max()
+    low_volume = int(dataFrame['v'].min())
+    avg_volume = int(dataFrame['v'].mean())
+    high_volume = int(dataFrame['v'].max())
+
     #Use low and high volumes to determine color scale size
     # Use average volume to determine whether data is red (50% & below)
     #  or green (above 50%)
@@ -97,14 +99,15 @@ def return_volume_graph(dataFrame):
                 marker=dict(
                     size= 0.000001 * dataFrame['v'],
                     sizemin= 3,
-                    color= [2000000, 4000000, 6000000, 8000000, 10000000],
+                    #color= [low_volume, avg_volume, high_volume],
+                    color= dataFrame['v'],
                     colorscale= [[0, 'red'], [1, 'green']],
                     showscale= True)
                 )
-                #mode='markers',
-                #marker_size=[8, 16, 32, 40, 50, 60])
             ],
-            layout={'title':'Volume'})
+            layout={
+                'title':'Volume',
+                'paper_bgcolor': 'rgba(0,0,0,1)'})
     
     figure.update_layout(
         #Set graph margins, remove white padding
