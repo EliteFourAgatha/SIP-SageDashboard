@@ -54,11 +54,17 @@ app.layout = html.Div(
                     width=6)
             ]
        ),
+       dbc.Row(
+           dbc.Col(
+               dcc.Graph(id='bar-graph', animate=True)
+           )
+       )
     ]
 )           
 
 @app.callback(Output('stock-graph', 'figure'), # Price chart figure
                 Output('volume-graph', 'figure'),
+                Output('bar-graph', 'figure'),
                 [Input('ticker-input-button', 'n_clicks')], #Input button fires callback
                 [State('ticker-input-searchbar', 'value')],
                 prevent_initial_call = True) #Take input searchbar state
@@ -79,20 +85,18 @@ def return_dashboard(n_clicks, ticker):
 
 
     df = pd.DataFrame.from_dict(data)
+    #Convert time column from UNIX to datetime
     df['t'] = pd.to_datetime(df['t'], unit='s')
 
-
-
-    #df = pd.DataFrame.from_dict(data, orient='index')
-    #close_list = df['c'].tolist()
-    #time_list = df['t'].tolist()
-
-    #dates_df = pd.to_datetime(df['t'], unit='s', origin='unix')
-    df2 = px.data.gapminder().query("continent == 'Oceania'")
-
-    stock_fig = px.line(df, x='t', y='c')
+    stock_fig = px.line(df, x='t', y='c', template="plotly_dark",
+                        labels={ #Manual axis labels
+                            't': 'Date',
+                            'c': 'Close ($)'
+                        })
 
     volume_fig = return_volume_graph(df)
+
+    bar_fig = return_bar_graph()
 
     #ts = TimeSeries(key=api_key, output_format='pandas')
     #data, meta_data = ts.get_intraday(symbol=ticker, interval='1min', outputsize='full')
@@ -120,7 +124,7 @@ def return_dashboard(n_clicks, ticker):
     #    }
 #    )
 
-    return stock_fig, volume_fig
+    return stock_fig, volume_fig, bar_fig
 
           
 if __name__ == '__main__':

@@ -85,16 +85,10 @@ def return_volume_graph(dataFrame):
     avg_volume = int(dataFrame['v'].mean())
     high_volume = int(dataFrame['v'].max())
 
-    #Use low and high volumes to determine color scale size
-    # Use average volume to determine whether data is red (50% & below)
-    #  or green (above 50%)
-
     figure = pgo.Figure(
             data=[pgo.Scatter(
                 x=dataFrame['t'],
                 y=dataFrame['v'],
-                #x=[1, 3.2, 5.4, 7.6, 9.8, 12.5],
-                #y=[1, 3.2, 5.4, 7.6, 9.8, 12.5],
                 mode='markers',
                 marker=dict(
                     size= 0.000001 * dataFrame['v'],
@@ -107,11 +101,13 @@ def return_volume_graph(dataFrame):
             ],
             layout={
                 'title':'Volume',
-                'paper_bgcolor': 'rgba(0,0,0,1)'})
+                #'paper_bgcolor': 'rgba(0,0,0,0.8)'
+                })
     
     figure.update_layout(
         #Set graph margins, remove white padding
-        margin=dict(l=25, r=25, t=25, b=25)
+        margin=dict(l=25, r=25, t=25, b=25),
+        template= "plotly_dark"
     )
     figure.update_yaxes(
         title='Volume'
