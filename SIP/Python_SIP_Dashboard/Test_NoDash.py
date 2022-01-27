@@ -74,13 +74,8 @@ df = pd.DataFrame.from_dict(data)
 df['t'] = pd.to_datetime(df['t'], unit='s')
 #plot(df)
 
-df2 = px.data.gapminder().query("continent == 'Oceania'")
-#fig = px.bar(df, x='year', y='pop',
-           #  hover_data=['lifeExp', 'gdpPercap'], color='country',
-            # labels={'pop':'population of Canada'})
-
 #print(df.info(verbose=True))
-#print(df)
+print(df)
 
 print(now_time)
 print(now_unix)

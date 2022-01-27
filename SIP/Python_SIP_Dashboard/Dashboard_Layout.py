@@ -58,32 +58,23 @@ def return_timeinterval():
 
 def return_bar_graph():
     figure = px.bar(
-            x=['Index', 'A', 'B', 'C', 'D'],
-            y=[1, 0.5, -1, 0.4, 0.7]
+            x=['Index', 'Stock', 'A', 'B', 'C'],
+            y=[1, 0.5, 0.2, 0.4, 0.7],
+            title="Beta"
         )
     figure.update_layout(
         #Set graph margins, remove white padding
-        margin=dict(l=25, r=25, t=25, b=25)
+        margin=dict(l=25, r=25, t=25, b=25),
+        template= "plotly_dark",
+        title_x = 0.5,
+        title_font_size = 16
+    )
+    figure.update_xaxes(
+        title= ''
     )
     return figure
 
- #   figure={
-  #  'data': [
-  #      {'x': [1], 'y': [1.3], 'type': 'bar', 'name': 'Chosen Stock'},
-  #      {'x': [1], 'y': [1], 'type': 'bar', 'name': 'S&P Index'},
-   #     {'x': [1], 'y': [0.2], 'type': 'bar', 'name': 'Stock2'},
-   #     {'x': [1], 'y': [-0.5], 'type': 'bar', 'name': 'Stock5'},
-    #    {'x': [1], 'y': [0.4], 'type': 'bar', 'name': 'Stock3'},
- #       {'x': [1], 'y': [1.3], 'type': 'bar', 'name': 'Stock6'},
- #       ],
- #   'layout': {'title': 'Beta', 'y': ''}
- #   }
-
-
 def return_volume_graph(dataFrame):
-    low_volume = int(dataFrame['v'].min())
-    avg_volume = int(dataFrame['v'].mean())
-    high_volume = int(dataFrame['v'].max())
 
     figure = pgo.Figure(
             data=[pgo.Scatter(
@@ -91,29 +82,33 @@ def return_volume_graph(dataFrame):
                 y=dataFrame['v'],
                 mode='markers',
                 marker=dict(
-                    size= 0.000001 * dataFrame['v'],
+                    size= 0.000001 * dataFrame['v'], 
                     sizemin= 3,
-                    #color= [low_volume, avg_volume, high_volume],
-                    color= dataFrame['v'],
+                    color= dataFrame['v'], 
                     colorscale= [[0, 'red'], [1, 'green']],
                     showscale= True)
                 )
             ],
             layout={
-                'title':'Volume',
-                #'paper_bgcolor': 'rgba(0,0,0,0.8)'
+                'title':'Volume'
                 })
     
     figure.update_layout(
         #Set graph margins, remove white padding
         margin=dict(l=25, r=25, t=25, b=25),
-        template= "plotly_dark"
+        template= "plotly_dark",
+        title_x= 0.5,
+        title_font_size = 20,
+
+        #format for $1.20 notation, not needed here
+        #yaxis_tickprefix = '$',
+        #yaxis_tickformat = ',.2f'
     )
     figure.update_yaxes(
-        title='Volume'
+        title=''
     )
     figure.update_xaxes(
-        title='Date'
+        title=''
     )
     return figure
 

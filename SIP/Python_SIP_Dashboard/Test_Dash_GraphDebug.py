@@ -91,8 +91,16 @@ def return_dashboard(n_clicks, ticker):
     stock_fig = px.line(df, x='t', y='c', template="plotly_dark",
                         labels={ #Manual axis labels
                             't': 'Date',
-                            'c': 'Close ($)'
+                            'c': 'Close'
                         })
+    
+    stock_fig.update_yaxes(
+        tickprefix = '$',
+        tickformat = ',.2f'
+    )
+    stock_fig.update_xaxes(
+        title = ''
+    )
 
     volume_fig = return_volume_graph(df)
 
