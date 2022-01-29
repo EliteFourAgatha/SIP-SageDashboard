@@ -24,32 +24,39 @@ def return_basic_info_card():
                 style={'text-align':'center'}),
             dbc.CardBody([
                 html.Div([
-                    dbc.Row([
-                        dbc.Col(
-                            html.H6(id='stock-ticker'),
-                                ),
-                        dbc.Col(
-                            html.H6(id='stock-price'),
-                                )                             
-                            ]),
-                    dbc.Row([
-                        dbc.Col(
-                            html.H6(id="stock-analyst-price")
-                        ),
-                    dbc.Row([
-                        dbc.Col(
-                            html.H6(id="stock-sector")
-                        ),
-                    dbc.Row([
-                        dbc.Col(
-                            html.H6(id="stock-industry")
-                        ),
-                        ])
-                    ]),
-                ]),
+                    dbc.Row(
+                        [
+                            dbc.Col(
+                                html.H6(id='stock-ticker')),
+                            dbc.Col(
+                                html.H6(id='stock-price'))                             
+                        ]
+                    ),
+                    dbc.Row(
+                            dbc.Col(
+                                html.H6(id="stock-analyst-price"))
+                    ),
+                    #dbc.Row(
+                    #    [
+                    #        dbc.Col(
+                    #            html.H6(id="52-week-high", style={'color: green'})
+                    #        ),
+                    #        dbc.Col(
+                    #            html.H6(id="52-week-low", style={'color: red'})
+                    #        ),
+                    #    ]
+                    #),
+                    dbc.Row(
+                            dbc.Col(
+                                html.H6(id="stock-sector"))
+                    ),
+                    dbc.Row(
+                            dbc.Col(
+                                html.H6(id="stock-industry"))
+                    )
+                ])
             ])
         ])
-    ])
     return card
 # End basic info card
 

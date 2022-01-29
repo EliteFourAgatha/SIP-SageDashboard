@@ -12,8 +12,7 @@ import dash_bootstrap_components as dbc
 from dash.dependencies import Input, Output, State
 import plotly.graph_objects as pgo
 import requests
-import json
-import itertools #for iterating through newsApi cards
+import finnhub
 
 from newsapi import NewsApiClient
 import plotly.express as px
@@ -74,22 +73,32 @@ app.layout = html.Div(
        ),
        dbc.Row(
            [
-               #News module
-                dbc.Col(
-                    dbc.Card([
-                        html.Div(id='news-card-one'),
-                        html.Div(id='news-card-two'),
-                        html.Div(id='news-card-three')
-                    ]), width=8),
                 #Beta/industry graph
                 dbc.Col(
                     [
                         dcc.Graph(id='bar-graph',
                             config={'displayModeBar': False}),
+
+                    ], 
+                    width=6), #End col
+                dbc.Col(
+                    [
                         dcc.Graph(id='volume-graph',
                             config={'displayModeBar': False})
-                    ], width=4), #End col
-            ]) #End row
+                    ], 
+                    width=6)
+            ]), #End row
+        dbc.Row(
+            [
+                #News module
+                dbc.Col(
+                    dbc.Card([
+                        html.Div(id='news-card-one'),
+                        html.Div(id='news-card-two'),
+                        html.Div(id='news-card-three')
+                    ]), width=10),
+            ]
+        )
     ]
 )           
 
@@ -98,6 +107,8 @@ app.layout = html.Div(
 #  Returns: Table, graph, and general info
 @app.callback(Output('stock-name-and-ticker', 'children'), # Stock Name & (Ticker)
                 Output('stock-analyst-price', 'children'), # Analyst stock price
+                #Output('52-week-high', 'children'),
+                #Output('52-week-low', 'children'),
                 Output('price-book-test', 'children'), # Price-to-Book Ratio
                 Output('ebitda-test', 'children'), # EBITDA
                 Output('pe-ratio-test', 'children'), # P/E Ratio
@@ -127,9 +138,13 @@ def return_dashboard(n_clicks, time_value, ticker):
 
     #Basic stock info (top left of layout)
     name_ticker_and_price = str(overview_json.get('Name')) + " (" + ticker + ")" + "    " + " $CurrentPrice"
-    stock_sector = 'Sector: ' + overview_json.get('Sector')
-    stock_industry = 'Industry: ' + overview_json.get('Industry')
+    stock_sector = 'Sector: ' + str(overview_json.get('Sector'))
+    stock_industry = 'Industry: ' + str(overview_json.get('Industry'))
     stock_target_price = 'Analyst target: ' + str(overview_json.get('AnalystTargetPrice'))
+    yearly_high = '52-week High: ' + str(overview_json.get('52WeekHigh'))     #Make this green
+    yearly_low = '52-week Low: ' + str(overview_json.get('52WeekLow'))    #Make this red
+
+
 
     news_client = NewsApiClient(api_key=news_api)
     news_dict = news_client.get_everything(qintitle=ticker, language="en")
@@ -160,35 +175,46 @@ def return_dashboard(n_clicks, time_value, ticker):
     stock_ebitda = overview_json.get('EBITDA')
     stock_priceBookRatio = overview_json.get('PriceToBookRatio')
 
-    stock_yearly_high = overview_json.get('52WeekHigh')     #Make this green
-    stock_yearly_low = overview_json.get('52WeekLow')    #Make this red
-
     if time_value == '1mo':
         #Do alpha vantage api call here for most recent month (year1month1 slice)
-        ts = TimeSeries(key=api_key, output_format='csv')
-        data = ts.get_intraday_extended(symbol=ticker,interval='60min',slice='year1month1')
-        
-        #csv --> dataframe
-        df = pd.DataFrame(list(data[0]))
-        #set index column name
-        df.index.name = 'date'
+        finnhub_client = finnhub.Client(api_key=finnhub_api_key)
 
-        stockBar_fig = return_bar_graph()
-        stockVolume_fig = return_volume_graph(df)
-        
-        stockPrice_fig = pgo.Figure()
-        
-        stockPrice_fig.add_trace(pgo.Scatter(x=df[0], y=df[4]))
+        #data = finnhub_client.stock_candles(ticker, 'D', month_ago_unix, now_unix)
+        data = finnhub_client.stock_candles(ticker, 'D', 1640050185, 1642728585)
 
+
+        df = pd.DataFrame.from_dict(data)
+        #Convert time column from UNIX to datetime
+        df['t'] = pd.to_datetime(df['t'], unit='s')
+
+        stock_fig = px.line(df, x='t', y='c', template="plotly_dark",
+                            labels={ #Manual axis labels
+                                't': 'Date',
+                                'c': 'Close'
+                            })
+        
+        stock_fig.update_yaxes(
+            tickprefix = '$',
+            tickformat = ',.2f'
+        )
+        stock_fig.update_xaxes(
+            title = ''
+        )
         #Set graph margins, remove white padding
-        stockPrice_fig.update_layout(margin=dict(l=25, r=25, t=25, b=25))
-        stockPrice_fig.update_yaxes(tickprefix='$', tickformat=',.2f', nticks=5)
-        stockPrice_fig.update_xaxes(ticks="outside", tickwidth=2, tickcolor='black', ticklen=10)
+        stock_fig.update_layout(margin=dict(l=25, r=25, t=25, b=25))
+        stock_fig.update_yaxes(tickprefix='$', tickformat=',.2f', nticks=5)
+        stock_fig.update_xaxes(ticks="outside", tickwidth=2, tickcolor='black', ticklen=10)
+
+        volume_fig = return_volume_graph(df)
+
+        bar_fig = return_bar_graph()
+
+
     
     else:
-        stockPrice_fig = pgo.Figure(data=[])
-        stockBar_fig = pgo.Figure(data=[])
-        stockVolume_fig = pgo.Figure(data=[])
+        stock_fig = pgo.Figure(data=[])
+        bar_fig = pgo.Figure(data=[])
+        volume_fig = pgo.Figure(data=[])
 
     #Industry comparison module
     #Used to determine which exchange stock is in for industry comparison
@@ -198,7 +224,7 @@ def return_dashboard(n_clicks, time_value, ticker):
     return name_ticker_and_price, stock_target_price, \
     stock_priceBookRatio, stock_ebitda,  \
     stock_pe_ratio, stock_peg_ratio, stock_div_yield, \
-    stockPrice_fig, stockBar_fig, stockVolume_fig, \
+    stock_fig, bar_fig, volume_fig, \
     stock_sector, \
     stock_industry, \
     news_card_one, news_card_two, news_card_three
