@@ -7,7 +7,6 @@ import matplotlib.pyplot as plt
 import dash
 import dash_core_components as dcc
 import dash_html_components as html
-import dash_table as dt
 import dash_bootstrap_components as dbc
 from dash.dependencies import Input, Output, State
 import plotly.graph_objects as pgo
@@ -17,7 +16,7 @@ import finnhub
 from newsapi import NewsApiClient
 import plotly.express as px
 import datetime
-import mplfinance
+from dateutil.relativedelta import relativedelta
 
 from Dashboard_Layout import *
 from Card_Layout import *
@@ -175,13 +174,54 @@ def return_dashboard(n_clicks, time_value, ticker):
     stock_ebitda = overview_json.get('EBITDA')
     stock_priceBookRatio = overview_json.get('PriceToBookRatio')
 
-    if time_value == '1mo':
-        #Do alpha vantage api call here for most recent month (year1month1 slice)
-        finnhub_client = finnhub.Client(api_key=finnhub_api_key)
+    #Industry comparison module
+    #Used to determine which exchange stock is in for industry comparison
+    #exchange = overview_json.get('Exchange')
 
-        #data = finnhub_client.stock_candles(ticker, 'D', month_ago_unix, now_unix)
-        data = finnhub_client.stock_candles(ticker, 'D', 1640050185, 1642728585)
 
+    # Main price chart
+    # Code common to all time periods:
+    finnhub_client = finnhub.Client(api_key=finnhub_api_key)
+    # datetime object containing current date and time
+    now = datetime.now()
+    now_unix = int(now.timestamp())
+
+    # Time periods
+    if time_value == '5D':
+        
+        five_days_ago_unix = now - relativedelta(days=5)
+        five_days_ago_unix = int(five_days_ago_unix.timestamp())
+
+        data = finnhub_client.stock_candles(ticker, 'D', five_days_ago_unix, now_unix)
+
+        df = pd.DataFrame.from_dict(data)        
+        df['t'] = pd.to_datetime(df['t'], unit='s') #Convert time column from UNIX to datetime
+
+        stock_fig = px.line(df, x='t', y='c', template="plotly_dark",
+                            labels={ #Manual axis labels
+                                't': 'Date',
+                                'c': 'Close'
+                            })        
+        stock_fig.update_yaxes(
+            tickprefix = '$',
+            tickformat = ',.2f' 
+        )
+        stock_fig.update_xaxes(
+            title = ''
+        )
+        stock_fig.update_layout(margin=dict(l=25, r=25, t=25, b=25)) #Remove graph padding
+        stock_fig.update_yaxes(tickprefix='$', tickformat=',.2f', nticks=5)
+        stock_fig.update_xaxes(ticks="outside", tickwidth=2, tickcolor='black', ticklen=10)
+
+        volume_fig = return_volume_graph(df)
+
+        bar_fig = return_bar_graph()
+    
+    elif time_value == '1mo':
+
+        month_ago_unix = now - relativedelta(months=1)
+        month_ago_unix = int(month_ago_unix.timestamp())
+        data = finnhub_client.stock_candles(ticker, 'D', month_ago_unix, now_unix)
 
         df = pd.DataFrame.from_dict(data)
         #Convert time column from UNIX to datetime
@@ -208,17 +248,13 @@ def return_dashboard(n_clicks, time_value, ticker):
         volume_fig = return_volume_graph(df)
 
         bar_fig = return_bar_graph()
-
-
     
     else:
         stock_fig = pgo.Figure(data=[])
         bar_fig = pgo.Figure(data=[])
         volume_fig = pgo.Figure(data=[])
 
-    #Industry comparison module
-    #Used to determine which exchange stock is in for industry comparison
-    exchange = overview_json.get('Exchange')
+
 
     #Return these values to output, in order
     return name_ticker_and_price, stock_target_price, \
