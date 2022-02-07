@@ -56,6 +56,7 @@ app.layout = html.Div(
                                 dbc.Col([
                                     return_price_to_book_with_hover(),
                                     return_divYield_with_hover(),
+                                    return_beta_with_hover(),
                                 ])
                             ])
                        ]), width=6), # End col
@@ -94,7 +95,8 @@ app.layout = html.Div(
                     dbc.Card([
                         html.Div(id='news-card-one'),
                         html.Div(id='news-card-two'),
-                        html.Div(id='news-card-three')
+                        html.Div(id='news-card-three'),
+                        html.Div(id='news-card-four')
                     ]), width=10),
             ]
         )
@@ -113,14 +115,16 @@ app.layout = html.Div(
                 Output('pe-ratio-test', 'children'), # P/E Ratio
                 Output('peg-ratio-test', 'children'), # (P/E)/Growth Ratio
                 Output('div-yield-test', 'children'), # Dividend yield %
+                Output('beta-test', 'children'), # Beta
                 Output('stock-price-graph', 'figure'), # Price chart figure
                 Output('bar-graph', 'figure'), # Price chart figure
                 Output('volume-graph', 'figure'), # Price chart figure
                 Output('stock-sector', 'children'), # Sector
                 Output('stock-industry', 'children'), #Industry
-                Output('news-card-one', 'children'), #Industry
-                Output('news-card-two', 'children'), #Industry
-                Output('news-card-three', 'children'), #Industry
+                Output('news-card-one', 'children'),
+                Output('news-card-two', 'children'), 
+                Output('news-card-three', 'children'),
+                Output('news-card-four', 'children'),
                 [Input('ticker-input-button', 'n_clicks')], #Input button fires callback
                 [State('time-interval-radio', 'value')], #Take radio value state
                 [State('ticker-input-searchbar', 'value')], #Take input searchbar state
@@ -134,14 +138,6 @@ def return_dashboard(n_clicks, time_value, ticker):
     #Company Overview call to populate table and headers
     overview_response = requests.get(api_url + "OVERVIEW&symbol=" + ticker + "&apikey=" + api_key)
     overview_json = overview_response.json()#Maybe redundant, might be able return data in json form already
-
-    #Basic stock info (top left of layout)
-    name_ticker_and_price = str(overview_json.get('Name')) + " (" + ticker + ")" + "    " + " $CurrentPrice"
-    stock_sector = 'Sector: ' + str(overview_json.get('Sector'))
-    stock_industry = 'Industry: ' + str(overview_json.get('Industry'))
-    stock_target_price = 'Analyst target: ' + str(overview_json.get('AnalystTargetPrice'))
-    yearly_high = '52-week High: ' + str(overview_json.get('52WeekHigh'))     #Make this green
-    yearly_low = '52-week Low: ' + str(overview_json.get('52WeekLow'))    #Make this red
 
 
 
@@ -163,9 +159,15 @@ def return_dashboard(n_clicks, time_value, ticker):
     artThree_url = news_dict['articles'][2]['url']
     artThree_urlImage = news_dict['articles'][2]['urlToImage']
 
+    artFour_title = news_dict['articles'][3]['title']
+    artFour_desc = news_dict['articles'][3]['description']
+    artFour_url = news_dict['articles'][3]['url']
+    artFour_urlImage = news_dict['articles'][3]['urlToImage']
+
     news_card_one = return_news_card_test(artOne_title, artOne_desc, artOne_url, artOne_urlImage)
     news_card_two = return_news_card_test(artTwo_title, artTwo_desc, artTwo_url, artTwo_urlImage)
-    news_card_three = return_news_card_test(artThree_title, artThree_desc, artThree_url, artThree_urlImage) 
+    news_card_three = return_news_card_test(artThree_title, artThree_desc, artThree_url, artThree_urlImage)
+    news_card_four = return_news_card_test(artFour_title, artFour_desc, artFour_url, artFour_urlImage)
 
     # Explained Metrics
     stock_pe_ratio = overview_json.get('PERatio')
@@ -173,6 +175,7 @@ def return_dashboard(n_clicks, time_value, ticker):
     stock_div_yield = overview_json.get('DividendYield')
     stock_ebitda = overview_json.get('EBITDA')
     stock_priceBookRatio = overview_json.get('PriceToBookRatio')
+    stock_beta = overview_json.get('Beta')
 
     #Industry comparison module
     #Used to determine which exchange stock is in for industry comparison
@@ -191,7 +194,6 @@ def return_dashboard(n_clicks, time_value, ticker):
         
         five_days_ago_unix = now - relativedelta(days=5)
         five_days_ago_unix = int(five_days_ago_unix.timestamp())
-
         data = finnhub_client.stock_candles(ticker, 'D', five_days_ago_unix, now_unix)
 
         df = pd.DataFrame.from_dict(data)        
@@ -200,22 +202,16 @@ def return_dashboard(n_clicks, time_value, ticker):
         stock_fig = px.line(df, x='t', y='c', template="plotly_dark",
                             labels={ #Manual axis labels
                                 't': 'Date',
-                                'c': 'Close'
-                            })        
-        stock_fig.update_yaxes(
-            tickprefix = '$',
-            tickformat = ',.2f' 
-        )
-        stock_fig.update_xaxes(
-            title = ''
-        )
-        stock_fig.update_layout(margin=dict(l=25, r=25, t=25, b=25)) #Remove graph padding
-        stock_fig.update_yaxes(tickprefix='$', tickformat=',.2f', nticks=5)
-        stock_fig.update_xaxes(ticks="outside", tickwidth=2, tickcolor='black', ticklen=10)
+                                'c': 'Close'})
 
         volume_fig = return_volume_graph(df)
+        stock_price = df['c'].iloc[-1]
 
-        bar_fig = return_bar_graph()
+        trends = finnhub_client.recommendation_trends('AAPL')
+
+        trend_df = pd.DataFrame.from_dict(trends)
+        #trend_df = trend_df[trend_df.index == 0]
+        bar_fig = return_sentiment_bar_graph(trend_df)        
     
     elif time_value == '1mo':
 
@@ -224,46 +220,67 @@ def return_dashboard(n_clicks, time_value, ticker):
         data = finnhub_client.stock_candles(ticker, 'D', month_ago_unix, now_unix)
 
         df = pd.DataFrame.from_dict(data)
-        #Convert time column from UNIX to datetime
-        df['t'] = pd.to_datetime(df['t'], unit='s')
+        df['t'] = pd.to_datetime(df['t'], unit='s')#Convert time column from UNIX to datetime
 
         stock_fig = px.line(df, x='t', y='c', template="plotly_dark",
                             labels={ #Manual axis labels
                                 't': 'Date',
                                 'c': 'Close'
                             })
-        
-        stock_fig.update_yaxes(
-            tickprefix = '$',
-            tickformat = ',.2f'
-        )
-        stock_fig.update_xaxes(
-            title = ''
-        )
-        #Set graph margins, remove white padding
-        stock_fig.update_layout(margin=dict(l=25, r=25, t=25, b=25))
-        stock_fig.update_yaxes(tickprefix='$', tickformat=',.2f', nticks=5)
-        stock_fig.update_xaxes(ticks="outside", tickwidth=2, tickcolor='black', ticklen=10)
 
         volume_fig = return_volume_graph(df)
+        stock_price = df['c'].iloc[-1]
 
-        bar_fig = return_bar_graph()
-    
+    elif time_value == '3mo':
+
+        month_ago_unix = now - relativedelta(months=3)
+        month_ago_unix = int(month_ago_unix.timestamp())
+        data = finnhub_client.stock_candles(ticker, 'D', month_ago_unix, now_unix)
+
+        df = pd.DataFrame.from_dict(data)
+        df['t'] = pd.to_datetime(df['t'], unit='s') #Convert time column from UNIX to datetime
+
+        stock_fig = px.line(df, x='t', y='c', template="plotly_dark",
+                            labels={ #Manual axis labels
+                                't': 'Date',
+                                'c': 'Close'})
+
+        volume_fig = return_volume_graph(df)
+        stock_price = df['c'].iloc[-1]
     else:
         stock_fig = pgo.Figure(data=[])
         bar_fig = pgo.Figure(data=[])
         volume_fig = pgo.Figure(data=[])
+    
+    stock_fig.update_yaxes(
+        tickprefix = '$',
+        tickformat = ',.2f',
+        nticks=5)
+    stock_fig.update_xaxes(
+        title = '')
+    stock_fig.update_layout(margin=dict(l=30, r=30, t=30, b=30)) # Remove white padding
+    #stock_fig.update_xaxes(ticks="outside", tickwidth=2, tickcolor='black', ticklen=10)
+
+
+    #Basic stock info (top left of layout)
+    ticker.upper() 
+    name_ticker_and_price = str(overview_json.get('Name')) + " (" + ticker + ")" + "        $" + str(stock_price)
+    stock_sector = 'Sector: ' + str(overview_json.get('Sector'))
+    stock_industry = 'Industry: ' + str(overview_json.get('Industry'))
+    stock_target_price = 'Analyst target: $' + str(overview_json.get('AnalystTargetPrice'))
+    yearly_high = '52-week High: ' + str(overview_json.get('52WeekHigh'))     #Make this green
+    yearly_low = '52-week Low: ' + str(overview_json.get('52WeekLow'))    #Make this red
 
 
 
     #Return these values to output, in order
     return name_ticker_and_price, stock_target_price, \
     stock_priceBookRatio, stock_ebitda,  \
-    stock_pe_ratio, stock_peg_ratio, stock_div_yield, \
+    stock_pe_ratio, stock_peg_ratio, stock_div_yield, stock_beta, \
     stock_fig, bar_fig, volume_fig, \
     stock_sector, \
     stock_industry, \
-    news_card_one, news_card_two, news_card_three
+    news_card_one, news_card_two, news_card_three, news_card_four
           
 if __name__ == '__main__':
     app.run_server(debug=True)

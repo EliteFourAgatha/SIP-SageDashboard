@@ -15,6 +15,7 @@ peRatio_Link = "https://www.forbes.com/advisor/investing/what-is-pe-price-earnin
 divYield_Link = "https://www.simplysafedividends.com/intelligent-income/posts/1071-dividend-yield-guide-definition-formula-examples-risks"
 peGRatio_Link = "https://www.investopedia.com/ask/answers/012715/what-considered-good-peg-price-earnings-growth-ratio.asp"
 priceToBook_Link = "https://www.businessinsider.com/what-is-price-to-book-ratio"
+beta_Link = "https://www.investopedia.com/ask/answers/102714/whats-difference-between-alpha-and-beta.asp"
 
 # Basic info card
 def return_basic_info_card():
@@ -194,6 +195,34 @@ def return_price_to_book_with_hover():
                 html.P(
                     "",
                     id="price-book-test",
+                    style={'color': 'white', 'fontSize': '16', 'text-align':'left'})
+            ], className="col-md-1")
+        ]) #End dbc.Row
+    ]) #End html.Div
+    return div
+    
+def return_beta_with_hover():
+    div = html.Div([
+        dbc.Row([
+            dbc.Col([
+                html.P([
+                        html.A(
+                            "Beta: ",
+                            id="beta-anchor",
+                            href=beta_Link,
+                            target="_blank",
+                            style={"textDecoration": "underline", "cursor": "pointer", "text-align": "left"},
+                        )
+                ]), #End html.P
+            dbc.Tooltip(
+            "Basic explanation of beta goes here",
+            target="beta-anchor"
+                )
+            ], className="col-md-5",), #End dbc.Col
+            dbc.Col([
+                html.P(
+                    "",
+                    id="beta-test",
                     style={'color': 'white', 'fontSize': '16', 'text-align':'left'})
             ], className="col-md-1")
         ]) #End dbc.Row

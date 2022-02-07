@@ -57,15 +57,17 @@ def return_timeinterval():
                         style={'text-align':'center'})
     return layout
 
-def return_bar_graph():
-    figure = px.bar(
-            x=['Index', 'Stock', 'A', 'B', 'C'],
-            y=[1, 0.5, 0.2, 0.4, 0.7],
-            title="Beta"
+def return_sentiment_bar_graph(dataFrame):
+    figure = px.bar(dataFrame,
+            x=[dataFrame['buy'][0], dataFrame['hold'][0], dataFrame['sell'][0], dataFrame['strongBuy'][0], dataFrame['strongSell']],
+            y=[dataFrame['buy'][0], dataFrame['hold'][0], dataFrame['sell'][0], dataFrame['strongBuy'][0], dataFrame['strongSell']],
+            #y= [c for c in dataFrame.columns],
+            title="Analyst Sentiment",
+            #color=dataFrame
         )
     figure.update_layout(
         #Set graph margins, remove white padding
-        margin=dict(l=25, r=25, t=25, b=25),
+        margin=dict(l=30, r=30, t=30, b=30),
         template= "plotly_dark",
         title_x = 0.5,
         title_font_size = 16
@@ -84,7 +86,7 @@ def return_volume_graph(dataFrame):
                 mode='markers',
                 marker=dict(
                     size= 0.000001 * dataFrame['v'], 
-                    sizemin= 3,
+                    sizemin= 10,
                     color= dataFrame['v'], 
                     colorscale= [[0, 'red'], [1, 'green']],
                     showscale= True)
@@ -96,7 +98,7 @@ def return_volume_graph(dataFrame):
     
     figure.update_layout(
         #Set graph margins, remove white padding
-        margin=dict(l=25, r=25, t=25, b=25),
+        margin=dict(l=30, r=30, t=30, b=30),
         template= "plotly_dark",
         title_x= 0.5,
         title_font_size = 20,
