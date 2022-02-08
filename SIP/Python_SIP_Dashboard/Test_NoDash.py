@@ -44,44 +44,31 @@ news_api = '8ea69eabd7074f14a977d2f1541498f4'
 stock_name = 'Facebook'
 
 # datetime object containing current date and time
-now = datetime.now()
-nowUnixValue = time.mktime(now.timetuple()) * 1000
+now = datetime.now().date()
+
+current_year = now.year
+
+first_day_of_year = datetime(current_year, 1, 1).date()
+ytd_calculated_date = now - first_day_of_year
+print(ytd_calculated_date.days)
 
 
-# dd/mm/YY H:M:S
-dt_string = now.strftime("%d/%m/%Y %H:%M")
+# dd/mm/YY
+dt_string = now.strftime("%d/%m/%Y")
 print("date and time =", dt_string)
-
-# datetime object containing current date and time
-now = datetime.now()
-now_unix = int(now.timestamp())
-
-month_ago_unix = now - relativedelta(months=1)
-month_ago_unix = int(month_ago_unix.timestamp())
 
 finnhub_client = finnhub.Client(api_key=finnhub_api_key)
 
 trends = finnhub_client.recommendation_trends('AAPL')
 trend_df = pd.DataFrame.from_dict(trends)
 
-
-print(trend_df['buy'][0])
-print(trend_df.columns)
+#print(trend_df['buy'][0])
+#print(trend_df.columns)
 
 data_canada = px.data.gapminder().query("country == 'Canada'")
 fig = px.bar(data_canada, x='year', y='pop')
-print(data_canada)
 
-data = finnhub_client.stock_candles('msft', 'D', 1590988249, 1591852249)
 
-df = pd.DataFrame.from_dict(data)
-df['t'] = pd.to_datetime(df['t'], unit='s')
-#plot(df)
 
-#print(df.info(verbose=True))
-#print(df)
-
-print(now_unix)
-print(month_ago_unix)
-#print(month_ago_unix)
+print(now)
 

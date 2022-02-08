@@ -16,6 +16,7 @@ import finnhub
 from newsapi import NewsApiClient
 import plotly.express as px
 import datetime
+from datetime import date
 from dateutil.relativedelta import relativedelta
 
 from Dashboard_Layout import *
@@ -233,8 +234,24 @@ def return_dashboard(n_clicks, time_value, ticker):
 
     elif time_value == '3mo':
 
-        month_ago_unix = now - relativedelta(months=3)
-        month_ago_unix = int(month_ago_unix.timestamp())
+        three_month_ago_unix = now - relativedelta(months=3)
+        three_month_ago_unix = int(three_month_ago_unix.timestamp())
+        data = finnhub_client.stock_candles(ticker, 'D', three_month_ago_unix, now_unix)
+
+        df = pd.DataFrame.from_dict(data)
+        df['t'] = pd.to_datetime(df['t'], unit='s') #Convert time column from UNIX to datetime
+
+        stock_fig = px.line(df, x='t', y='c', template="plotly_dark",
+                            labels={ #Manual axis labels
+                                't': 'Date',
+                                'c': 'Close'})
+
+        volume_fig = return_volume_graph(df)
+        stock_price = df['c'].iloc[-1]
+
+    elif time_value == 'YTD':
+        
+        
         data = finnhub_client.stock_candles(ticker, 'D', month_ago_unix, now_unix)
 
         df = pd.DataFrame.from_dict(data)
@@ -247,6 +264,24 @@ def return_dashboard(n_clicks, time_value, ticker):
 
         volume_fig = return_volume_graph(df)
         stock_price = df['c'].iloc[-1]
+    
+    elif time_value == '1Y':
+
+        year_ago_unix = now - relativedelta(years=1)
+        year_ago_unix = int(year_ago_unix.timestamp())
+        data = finnhub_client.stock_candles(ticker, 'D', year_ago_unix, now_unix)
+
+        df = pd.DataFrame.from_dict(data)
+        df['t'] = pd.to_datetime(df['t'], unit='s') #Convert time column from UNIX to datetime
+
+        stock_fig = px.line(df, x='t', y='c', template="plotly_dark",
+                            labels={ #Manual axis labels
+                                't': 'Date',
+                                'c': 'Close'})
+
+        volume_fig = return_volume_graph(df)
+        stock_price = df['c'].iloc[-1]
+
     else:
         stock_fig = pgo.Figure(data=[])
         bar_fig = pgo.Figure(data=[])
