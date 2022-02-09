@@ -174,6 +174,8 @@ def return_dashboard(n_clicks, time_value, ticker):
     stock_pe_ratio = overview_json.get('PERatio')
     stock_peg_ratio = overview_json.get('PEGRatio')
     stock_div_yield = overview_json.get('DividendYield')
+    stock_div_yield = float(stock_div_yield)
+    stock_div_yield = '{:.1%}'.format(stock_div_yield)
     stock_ebitda = overview_json.get('EBITDA')
     stock_priceBookRatio = overview_json.get('PriceToBookRatio')
     stock_beta = overview_json.get('Beta')
@@ -208,7 +210,7 @@ def return_dashboard(n_clicks, time_value, ticker):
         volume_fig = return_volume_graph(df)
         stock_price = df['c'].iloc[-1]
 
-        trends = finnhub_client.recommendation_trends('AAPL')
+        trends = finnhub_client.recommendation_trends(ticker)
 
         trend_df = pd.DataFrame.from_dict(trends)
         #trend_df = trend_df[trend_df.index == 0]
@@ -232,6 +234,12 @@ def return_dashboard(n_clicks, time_value, ticker):
         volume_fig = return_volume_graph(df)
         stock_price = df['c'].iloc[-1]
 
+        trends = finnhub_client.recommendation_trends(ticker)
+
+        trend_df = pd.DataFrame.from_dict(trends)
+        #trend_df = trend_df[trend_df.index == 0]
+        bar_fig = return_sentiment_bar_graph(trend_df)      
+
     elif time_value == '3mo':
 
         three_month_ago_unix = now - relativedelta(months=3)
@@ -249,10 +257,23 @@ def return_dashboard(n_clicks, time_value, ticker):
         volume_fig = return_volume_graph(df)
         stock_price = df['c'].iloc[-1]
 
-    elif time_value == 'YTD':
+        trends = finnhub_client.recommendation_trends(ticker)
+
+        trend_df = pd.DataFrame.from_dict(trends)
+        #trend_df = trend_df[trend_df.index == 0]
+        bar_fig = return_sentiment_bar_graph(trend_df)      
+
+    elif time_value == 'ytd':
         
-        
-        data = finnhub_client.stock_candles(ticker, 'D', month_ago_unix, now_unix)
+        nowDate = now.date()
+        current_year = nowDate.year
+        first_day_of_year = datetime(current_year, 1, 1).date()
+        days_since_new_year = nowDate - first_day_of_year
+
+        ytd_unix = now - relativedelta(days=days_since_new_year.days)
+        ytd_unix = int(ytd_unix.timestamp())
+
+        data = finnhub_client.stock_candles(ticker, 'D', ytd_unix, now_unix)
 
         df = pd.DataFrame.from_dict(data)
         df['t'] = pd.to_datetime(df['t'], unit='s') #Convert time column from UNIX to datetime
@@ -264,8 +285,14 @@ def return_dashboard(n_clicks, time_value, ticker):
 
         volume_fig = return_volume_graph(df)
         stock_price = df['c'].iloc[-1]
+
+        trends = finnhub_client.recommendation_trends(ticker)
+
+        trend_df = pd.DataFrame.from_dict(trends)
+        #trend_df = trend_df[trend_df.index == 0]
+        bar_fig = return_sentiment_bar_graph(trend_df)      
     
-    elif time_value == '1Y':
+    elif time_value == '1y':
 
         year_ago_unix = now - relativedelta(years=1)
         year_ago_unix = int(year_ago_unix.timestamp())
@@ -282,10 +309,17 @@ def return_dashboard(n_clicks, time_value, ticker):
         volume_fig = return_volume_graph(df)
         stock_price = df['c'].iloc[-1]
 
+        trends = finnhub_client.recommendation_trends(ticker)
+
+        trend_df = pd.DataFrame.from_dict(trends)
+        #trend_df = trend_df[trend_df.index == 0]
+        bar_fig = return_sentiment_bar_graph(trend_df)      
+
     else:
         stock_fig = pgo.Figure(data=[])
         bar_fig = pgo.Figure(data=[])
         volume_fig = pgo.Figure(data=[])
+        stock_price = '$Price_failed'
     
     stock_fig.update_yaxes(
         tickprefix = '$',

@@ -59,8 +59,11 @@ def return_timeinterval():
 
 def return_sentiment_bar_graph(dataFrame):
     figure = px.bar(dataFrame,
+            # Try doing x = dataFrame.column[0] or something. have x be equal to name of each column?
+
+
             x=[dataFrame['buy'][0], dataFrame['hold'][0], dataFrame['sell'][0], dataFrame['strongBuy'][0], dataFrame['strongSell']],
-            y=[dataFrame['buy'][0], dataFrame['hold'][0], dataFrame['sell'][0], dataFrame['strongBuy'][0], dataFrame['strongSell']],
+            y=[dataFrame.iat[0, 0], dataFrame.iat[0,1], dataFrame.iat[0, 3], dataFrame.iat[0, 4], dataFrame.iat[0, 5]],
             #y= [c for c in dataFrame.columns],
             title="Analyst Sentiment",
             #color=dataFrame

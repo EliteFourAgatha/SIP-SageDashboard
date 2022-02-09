@@ -49,8 +49,8 @@ now = datetime.now().date()
 current_year = now.year
 
 first_day_of_year = datetime(current_year, 1, 1).date()
-ytd_calculated_date = now - first_day_of_year
-print(ytd_calculated_date.days)
+days_since_new_year = now - first_day_of_year
+print(days_since_new_year.days)
 
 
 # dd/mm/YY
@@ -63,12 +63,4 @@ trends = finnhub_client.recommendation_trends('AAPL')
 trend_df = pd.DataFrame.from_dict(trends)
 
 #print(trend_df['buy'][0])
-#print(trend_df.columns)
-
-data_canada = px.data.gapminder().query("country == 'Canada'")
-fig = px.bar(data_canada, x='year', y='pop')
-
-
-
-print(now)
-
+print(trend_df)

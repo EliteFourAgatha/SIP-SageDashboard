@@ -152,7 +152,7 @@ def return_divYield_with_hover():
             dbc.Col([
                 html.P([
                         html.A(
-                            "Div Yield: ",
+                            "Dividend Yield: ",
                             id="div-yield-ratio-anchor",
                             href=divYield_Link,
                             target="_blank",
