@@ -11,6 +11,11 @@ import dash_table as dt
 from dash.dependencies import Input, Output
 
 #Consider putting these in another file
+
+eps_Link = "https://www.forbes.com/advisor/investing/what-is-pe-price-earnings-ratio/"
+marketcap_Link = "https://www.forbes.com/advisor/investing/what-is-pe-price-earnings-ratio/"
+
+
 peRatio_Link = "https://www.forbes.com/advisor/investing/what-is-pe-price-earnings-ratio/"
 divYield_Link = "https://www.simplysafedividends.com/intelligent-income/posts/1071-dividend-yield-guide-definition-formula-examples-risks"
 peGRatio_Link = "https://www.investopedia.com/ask/answers/012715/what-considered-good-peg-price-earnings-growth-ratio.asp"
@@ -61,7 +66,65 @@ def return_basic_info_card():
     return card
 # End basic info card
 
+
 # Main metric functions
+
+def return_marketcap_with_hover():
+    div = html.Div([
+        dbc.Row([
+            dbc.Col([
+                html.P([
+                        html.A(
+                            "PEG Ratio: ",
+                            id="peg-ratio-anchor",
+                            href=peGRatio_Link,
+                            target="_blank",
+                            style={"textDecoration": "underline", "cursor": "pointer", "text-align": "left"},
+                        )
+                ]), #End html.P
+            dbc.Tooltip(
+            "Basic explanation of peg goes here",
+            target="peg-ratio-anchor"
+                )
+            ], className="col-md-5",), #End dbc.Col
+            dbc.Col([
+                html.P(
+                    "",
+                    id="peg-ratio-test",
+                    style={'color': 'white', 'fontSize': '16', 'text-align':'left'})
+            ], className="col-md-1")
+        ]) #End dbc.Row
+    ]) #End html.Div
+    return div
+
+def return_eps_with_hover():
+    div = html.Div([
+        dbc.Row([
+            dbc.Col([
+                html.P([
+                        html.A(
+                            "PEG Ratio: ",
+                            id="peg-ratio-anchor",
+                            href=peGRatio_Link,
+                            target="_blank",
+                            style={"textDecoration": "underline", "cursor": "pointer", "text-align": "left"},
+                        )
+                ]), #End html.P
+            dbc.Tooltip(
+            "Basic explanation of peg goes here",
+            target="peg-ratio-anchor"
+                )
+            ], className="col-md-5",), #End dbc.Col
+            dbc.Col([
+                html.P(
+                    "",
+                    id="peg-ratio-test",
+                    style={'color': 'white', 'fontSize': '16', 'text-align':'left'})
+            ], className="col-md-1")
+        ]) #End dbc.Row
+    ]) #End html.Div
+    return div
+
 def return_ebitda_with_hover():
     div = html.Div([
         dbc.Row([

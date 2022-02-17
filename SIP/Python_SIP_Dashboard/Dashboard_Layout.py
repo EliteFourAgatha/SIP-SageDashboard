@@ -22,7 +22,7 @@ def return_input_bar():
             dbc.Col(
                 html.Div([
                     dcc.Input(id='ticker-input-searchbar', value='', type='text',
-                                                placeholder='Enter stock symbol here',
+                                                placeholder='Enter stock symbol',
                                                 style={'display': 'inline-block', 'width':'70%'}),
                     html.Button('Submit', id='ticker-input-button',
                                         style={'display': 'inline-block', 'width':'30%'})

@@ -50,14 +50,16 @@ app.layout = html.Div(
                             # Metrics with links
                             dbc.Row([
                                 dbc.Col([
-                                    return_ebitda_with_hover(),
+                                    return_marketcap_with_hover(),
                                     return_peRatio_with_hover(),
                                     return_peGRatio_with_hover(),
+                                    return_price_to_book_with_hover(),
                                 ]),
                                 dbc.Col([
-                                    return_price_to_book_with_hover(),
+                                    return_eps_with_hover(),
                                     return_divYield_with_hover(),
                                     return_beta_with_hover(),
+                                    return_ebitda_with_hover(),
                                 ])
                             ])
                        ]), width=6), # End col
@@ -109,8 +111,8 @@ app.layout = html.Div(
 #  Returns: Table, graph, and general info
 @app.callback(Output('stock-name-and-ticker', 'children'), # Stock Name & (Ticker)
                 Output('stock-analyst-price', 'children'), # Analyst stock price
-                #Output('52-week-high', 'children'),
-                #Output('52-week-low', 'children'),
+                Output('market-cap', 'children'), # Market Cap
+                Output('eps', 'children'), # EPS
                 Output('price-book-test', 'children'), # Price-to-Book Ratio
                 Output('ebitda-test', 'children'), # EBITDA
                 Output('pe-ratio-test', 'children'), # P/E Ratio
@@ -136,12 +138,8 @@ app.layout = html.Div(
 def return_dashboard(n_clicks, time_value, ticker):
     
     #try:
-    #Company Overview call to populate table and headers
-    overview_response = requests.get(api_url + "OVERVIEW&symbol=" + ticker + "&apikey=" + api_key)
-    overview_json = overview_response.json()#Maybe redundant, might be able return data in json form already
 
-
-
+    # News section
     news_client = NewsApiClient(api_key=news_api)
     news_dict = news_client.get_everything(qintitle=ticker, language="en")
 
@@ -171,6 +169,12 @@ def return_dashboard(n_clicks, time_value, ticker):
     news_card_four = return_news_card_test(artFour_title, artFour_desc, artFour_url, artFour_urlImage)
 
     # Explained Metrics
+    overview_response = requests.get(api_url + "OVERVIEW&symbol=" + ticker + "&apikey=" + api_key)
+    overview_json = overview_response.json()
+
+
+    stock_market_cap = overview_json.get('MarketCapitalization')
+    stock_eps = overview_json.get('EPS')
     stock_pe_ratio = overview_json.get('PERatio')
     stock_peg_ratio = overview_json.get('PEGRatio')
     stock_div_yield = overview_json.get('DividendYield')
@@ -188,8 +192,8 @@ def return_dashboard(n_clicks, time_value, ticker):
     # Main price chart
     # Code common to all time periods:
     finnhub_client = finnhub.Client(api_key=finnhub_api_key)
-    # datetime object containing current date and time
-    now = datetime.now()
+
+    now = datetime.now()  # datetime object, current date/time
     now_unix = int(now.timestamp())
 
     # Time periods
@@ -203,9 +207,7 @@ def return_dashboard(n_clicks, time_value, ticker):
         df['t'] = pd.to_datetime(df['t'], unit='s') #Convert time column from UNIX to datetime
 
         stock_fig = px.line(df, x='t', y='c', template="plotly_dark",
-                            labels={ #Manual axis labels
-                                't': 'Date',
-                                'c': 'Close'})
+                            labels={'t': 'Date', 'c': 'Close'})
 
         volume_fig = return_volume_graph(df)
         stock_price = df['c'].iloc[-1]
@@ -226,10 +228,7 @@ def return_dashboard(n_clicks, time_value, ticker):
         df['t'] = pd.to_datetime(df['t'], unit='s')#Convert time column from UNIX to datetime
 
         stock_fig = px.line(df, x='t', y='c', template="plotly_dark",
-                            labels={ #Manual axis labels
-                                't': 'Date',
-                                'c': 'Close'
-                            })
+                            labels={'t': 'Date','c': 'Close'})
 
         volume_fig = return_volume_graph(df)
         stock_price = df['c'].iloc[-1]
@@ -250,9 +249,7 @@ def return_dashboard(n_clicks, time_value, ticker):
         df['t'] = pd.to_datetime(df['t'], unit='s') #Convert time column from UNIX to datetime
 
         stock_fig = px.line(df, x='t', y='c', template="plotly_dark",
-                            labels={ #Manual axis labels
-                                't': 'Date',
-                                'c': 'Close'})
+                            labels={'t': 'Date','c': 'Close'})
 
         volume_fig = return_volume_graph(df)
         stock_price = df['c'].iloc[-1]
@@ -279,9 +276,7 @@ def return_dashboard(n_clicks, time_value, ticker):
         df['t'] = pd.to_datetime(df['t'], unit='s') #Convert time column from UNIX to datetime
 
         stock_fig = px.line(df, x='t', y='c', template="plotly_dark",
-                            labels={ #Manual axis labels
-                                't': 'Date',
-                                'c': 'Close'})
+                            labels={'t': 'Date','c': 'Close'})
 
         volume_fig = return_volume_graph(df)
         stock_price = df['c'].iloc[-1]
@@ -302,9 +297,7 @@ def return_dashboard(n_clicks, time_value, ticker):
         df['t'] = pd.to_datetime(df['t'], unit='s') #Convert time column from UNIX to datetime
 
         stock_fig = px.line(df, x='t', y='c', template="plotly_dark",
-                            labels={ #Manual axis labels
-                                't': 'Date',
-                                'c': 'Close'})
+                            labels={'t': 'Date','c': 'Close'})
 
         volume_fig = return_volume_graph(df)
         stock_price = df['c'].iloc[-1]
@@ -324,7 +317,7 @@ def return_dashboard(n_clicks, time_value, ticker):
     stock_fig.update_yaxes(
         tickprefix = '$',
         tickformat = ',.2f',
-        nticks=5)
+        nticks=7)
     stock_fig.update_xaxes(
         title = '')
     stock_fig.update_layout(margin=dict(l=30, r=30, t=30, b=30)) # Remove white padding
@@ -337,13 +330,12 @@ def return_dashboard(n_clicks, time_value, ticker):
     stock_sector = 'Sector: ' + str(overview_json.get('Sector'))
     stock_industry = 'Industry: ' + str(overview_json.get('Industry'))
     stock_target_price = 'Analyst target: $' + str(overview_json.get('AnalystTargetPrice'))
-    yearly_high = '52-week High: ' + str(overview_json.get('52WeekHigh'))     #Make this green
-    yearly_low = '52-week Low: ' + str(overview_json.get('52WeekLow'))    #Make this red
 
 
 
     #Return these values to output, in order
     return name_ticker_and_price, stock_target_price, \
+    stock_market_cap, stock_eps, \
     stock_priceBookRatio, stock_ebitda,  \
     stock_pe_ratio, stock_peg_ratio, stock_div_yield, stock_beta, \
     stock_fig, bar_fig, volume_fig, \
