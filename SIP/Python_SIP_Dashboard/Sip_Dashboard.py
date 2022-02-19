@@ -1,9 +1,4 @@
-import matplotlib.pyplot as plt
 import pandas as pd
-import numpy as np
-from alpha_vantage.timeseries import TimeSeries
-from alpha_vantage.techindicators import TechIndicators
-import matplotlib.pyplot as plt
 import dash
 import dash_core_components as dcc
 import dash_html_components as html
@@ -11,17 +6,15 @@ import dash_bootstrap_components as dbc
 from dash.dependencies import Input, Output, State
 import plotly.graph_objects as pgo
 import requests
-import finnhub
-
-from newsapi import NewsApiClient
 import plotly.express as px
 import datetime
-from datetime import date
 from dateutil.relativedelta import relativedelta
 
+import finnhub
+from newsapi import NewsApiClient
+
 from Dashboard_Layout import *
-from Card_Layout import *
-from Stock_Functions import *
+from BasicInfo_Layout import *
 from Keys1 import *
 
 #Initialize Dash App
@@ -46,7 +39,6 @@ app.layout = html.Div(
                        [
                             # Basic info card (name, price, etc.)
                             return_basic_info_card(),
-
                             # Metrics with links
                             dbc.Row([
                                 dbc.Col([
@@ -113,12 +105,12 @@ app.layout = html.Div(
                 Output('stock-analyst-price', 'children'), # Analyst stock price
                 Output('market-cap', 'children'), # Market Cap
                 Output('eps', 'children'), # EPS
-                Output('price-book-test', 'children'), # Price-to-Book Ratio
-                Output('ebitda-test', 'children'), # EBITDA
-                Output('pe-ratio-test', 'children'), # P/E Ratio
-                Output('peg-ratio-test', 'children'), # (P/E)/Growth Ratio
-                Output('div-yield-test', 'children'), # Dividend yield %
-                Output('beta-test', 'children'), # Beta
+                Output('price-book', 'children'), # Price-to-Book Ratio
+                Output('ebitda', 'children'), # EBITDA
+                Output('pe-ratio', 'children'), # P/E Ratio
+                Output('peg-ratio', 'children'), # (P/E)/Growth Ratio
+                Output('div-yield', 'children'), # Dividend yield %
+                Output('beta', 'children'), # Beta
                 Output('stock-price-graph', 'figure'), # Price chart figure
                 Output('bar-graph', 'figure'), # Price chart figure
                 Output('volume-graph', 'figure'), # Price chart figure
@@ -137,201 +129,226 @@ app.layout = html.Div(
 #  State allows you to pass along extra values without firing the callback function
 def return_dashboard(n_clicks, time_value, ticker):
     
-    #try:
+    try:
+        # News section
+        news_client = NewsApiClient(api_key=news_api)
+        news_dict = news_client.get_everything(qintitle=ticker, language="en")
 
-    # News section
-    news_client = NewsApiClient(api_key=news_api)
-    news_dict = news_client.get_everything(qintitle=ticker, language="en")
+        artOne_title = news_dict['articles'][0]['title']
+        artOne_desc = news_dict['articles'][0]['description']
+        artOne_url = news_dict['articles'][0]['url']
+        artOne_urlImage = news_dict['articles'][0]['urlToImage']
 
-    artOne_title = news_dict['articles'][0]['title']
-    artOne_desc = news_dict['articles'][0]['description']
-    artOne_url = news_dict['articles'][0]['url']
-    artOne_urlImage = news_dict['articles'][0]['urlToImage']
+        artTwo_title = news_dict['articles'][1]['title']
+        artTwo_desc = news_dict['articles'][1]['description']
+        artTwo_url = news_dict['articles'][1]['url']
+        artTwo_urlImage = news_dict['articles'][1]['urlToImage']
 
-    artTwo_title = news_dict['articles'][1]['title']
-    artTwo_desc = news_dict['articles'][1]['description']
-    artTwo_url = news_dict['articles'][1]['url']
-    artTwo_urlImage = news_dict['articles'][1]['urlToImage']
+        artThree_title = news_dict['articles'][2]['title']
+        artThree_desc = news_dict['articles'][2]['description']
+        artThree_url = news_dict['articles'][2]['url']
+        artThree_urlImage = news_dict['articles'][2]['urlToImage']
 
-    artThree_title = news_dict['articles'][2]['title']
-    artThree_desc = news_dict['articles'][2]['description']
-    artThree_url = news_dict['articles'][2]['url']
-    artThree_urlImage = news_dict['articles'][2]['urlToImage']
+        artFour_title = news_dict['articles'][3]['title']
+        artFour_desc = news_dict['articles'][3]['description']
+        artFour_url = news_dict['articles'][3]['url']
+        artFour_urlImage = news_dict['articles'][3]['urlToImage']
 
-    artFour_title = news_dict['articles'][3]['title']
-    artFour_desc = news_dict['articles'][3]['description']
-    artFour_url = news_dict['articles'][3]['url']
-    artFour_urlImage = news_dict['articles'][3]['urlToImage']
+        news_card_one = return_news_card_test(artOne_title, artOne_desc, artOne_url, artOne_urlImage)
+        news_card_two = return_news_card_test(artTwo_title, artTwo_desc, artTwo_url, artTwo_urlImage)
+        news_card_three = return_news_card_test(artThree_title, artThree_desc, artThree_url, artThree_urlImage)
+        news_card_four = return_news_card_test(artFour_title, artFour_desc, artFour_url, artFour_urlImage)
 
-    news_card_one = return_news_card_test(artOne_title, artOne_desc, artOne_url, artOne_urlImage)
-    news_card_two = return_news_card_test(artTwo_title, artTwo_desc, artTwo_url, artTwo_urlImage)
-    news_card_three = return_news_card_test(artThree_title, artThree_desc, artThree_url, artThree_urlImage)
-    news_card_four = return_news_card_test(artFour_title, artFour_desc, artFour_url, artFour_urlImage)
-
-    # Explained Metrics
-    overview_response = requests.get(api_url + "OVERVIEW&symbol=" + ticker + "&apikey=" + api_key)
-    overview_json = overview_response.json()
-
-
-    stock_market_cap = overview_json.get('MarketCapitalization')
-    stock_eps = overview_json.get('EPS')
-    stock_pe_ratio = overview_json.get('PERatio')
-    stock_peg_ratio = overview_json.get('PEGRatio')
-    stock_div_yield = overview_json.get('DividendYield')
-    stock_div_yield = float(stock_div_yield)
-    stock_div_yield = '{:.1%}'.format(stock_div_yield)
-    stock_ebitda = overview_json.get('EBITDA')
-    stock_priceBookRatio = overview_json.get('PriceToBookRatio')
-    stock_beta = overview_json.get('Beta')
-
-    #Industry comparison module
-    #Used to determine which exchange stock is in for industry comparison
-    #exchange = overview_json.get('Exchange')
+        # Explained Metrics
+        overview_response = requests.get(api_url + "OVERVIEW&symbol=" + ticker + "&apikey=" + api_key)
+        overview_json = overview_response.json()
 
 
-    # Main price chart
-    # Code common to all time periods:
-    finnhub_client = finnhub.Client(api_key=finnhub_api_key)
+        stock_market_cap = overview_json.get('MarketCapitalization')
+        stock_market_cap = int(stock_market_cap)
+        stock_market_cap = '{:,}'.format(stock_market_cap)
+        stock_eps = overview_json.get('EPS')
+        #stock_eps = int(stock_eps)
+        #stock_eps = '${:,}'.format(stock_eps)
+        stock_pe_ratio = overview_json.get('PERatio')
+        stock_peg_ratio = overview_json.get('PEGRatio')
+        stock_div_yield = overview_json.get('DividendYield')
+        stock_div_yield = float(stock_div_yield)
+        stock_div_yield = '{:.1%}'.format(stock_div_yield)
+        stock_ebitda = overview_json.get('EBITDA')
+        #stock_ebitda = int(stock_ebitda)
+        #stock_ebitda = '${:,}'.format(stock_ebitda)
+        stock_priceBookRatio = overview_json.get('PriceToBookRatio')
+        stock_beta = overview_json.get('Beta')
 
-    now = datetime.now()  # datetime object, current date/time
-    now_unix = int(now.timestamp())
+        # Main price chart
+        # Code common to all time periods:
+        finnhub_client = finnhub.Client(api_key=finnhub_api_key)
+        now = datetime.now()  # datetime object, current date/time
+        now_unix = int(now.timestamp())
 
-    # Time periods
-    if time_value == '5D':
+        # Time periods
+        if time_value == '5D':
+            
+            five_days_ago_unix = now - relativedelta(days=5)
+            five_days_ago_unix = int(five_days_ago_unix.timestamp())
+            data = finnhub_client.stock_candles(ticker, 'D', five_days_ago_unix, now_unix)
+
+            df = pd.DataFrame.from_dict(data)        
+            df['t'] = pd.to_datetime(df['t'], unit='s') #Convert time column from UNIX to datetime
+
+            stock_fig = px.line(df, x='t', y='c', template="plotly_dark",
+                                labels={'t': 'Date', 'c': 'Close'}) #Manual axis labels
+
+            volume_fig = return_volume_graph(df)
+            stock_price = df['c'].iloc[-1]
+
+            trends = finnhub_client.recommendation_trends(ticker)
+
+            trend_df = pd.DataFrame.from_dict(trends)
+            #trend_df = trend_df[trend_df.index == 0]
+            bar_fig = return_sentiment_bar_graph(trend_df)        
         
-        five_days_ago_unix = now - relativedelta(days=5)
-        five_days_ago_unix = int(five_days_ago_unix.timestamp())
-        data = finnhub_client.stock_candles(ticker, 'D', five_days_ago_unix, now_unix)
+        elif time_value == '1mo':
 
-        df = pd.DataFrame.from_dict(data)        
-        df['t'] = pd.to_datetime(df['t'], unit='s') #Convert time column from UNIX to datetime
+            month_ago_unix = now - relativedelta(months=1)
+            month_ago_unix = int(month_ago_unix.timestamp())
+            data = finnhub_client.stock_candles(ticker, 'D', month_ago_unix, now_unix)
 
-        stock_fig = px.line(df, x='t', y='c', template="plotly_dark",
-                            labels={'t': 'Date', 'c': 'Close'})
+            df = pd.DataFrame.from_dict(data)
+            df['t'] = pd.to_datetime(df['t'], unit='s')#Convert time column from UNIX to datetime
 
-        volume_fig = return_volume_graph(df)
-        stock_price = df['c'].iloc[-1]
+            stock_fig = px.line(df, x='t', y='c', template="plotly_dark",
+                                labels={'t': 'Date','c': 'Close'}) #Manual axis labels
 
-        trends = finnhub_client.recommendation_trends(ticker)
+            volume_fig = return_volume_graph(df)
+            stock_price = df['c'].iloc[-1]
 
-        trend_df = pd.DataFrame.from_dict(trends)
-        #trend_df = trend_df[trend_df.index == 0]
-        bar_fig = return_sentiment_bar_graph(trend_df)        
-    
-    elif time_value == '1mo':
+            trends = finnhub_client.recommendation_trends(ticker)
 
-        month_ago_unix = now - relativedelta(months=1)
-        month_ago_unix = int(month_ago_unix.timestamp())
-        data = finnhub_client.stock_candles(ticker, 'D', month_ago_unix, now_unix)
+            trend_df = pd.DataFrame.from_dict(trends)
+            #trend_df = trend_df[trend_df.index == 0]
+            bar_fig = return_sentiment_bar_graph(trend_df)      
 
-        df = pd.DataFrame.from_dict(data)
-        df['t'] = pd.to_datetime(df['t'], unit='s')#Convert time column from UNIX to datetime
+        elif time_value == '6mo':
 
-        stock_fig = px.line(df, x='t', y='c', template="plotly_dark",
-                            labels={'t': 'Date','c': 'Close'})
+            six_month_ago_unix = now - relativedelta(months=6)
+            six_month_ago_unix = int(six_month_ago_unix.timestamp())
+            data = finnhub_client.stock_candles(ticker, 'D', six_month_ago_unix, now_unix)
 
-        volume_fig = return_volume_graph(df)
-        stock_price = df['c'].iloc[-1]
+            df = pd.DataFrame.from_dict(data)
+            df['t'] = pd.to_datetime(df['t'], unit='s') #Convert time column from UNIX to datetime
 
-        trends = finnhub_client.recommendation_trends(ticker)
+            stock_fig = px.line(df, x='t', y='c', template="plotly_dark",
+                                labels={'t': 'Date','c': 'Close'}) #Manual axis labels
 
-        trend_df = pd.DataFrame.from_dict(trends)
-        #trend_df = trend_df[trend_df.index == 0]
-        bar_fig = return_sentiment_bar_graph(trend_df)      
+            volume_fig = return_volume_graph(df)
+            stock_price = df['c'].iloc[-1]
 
-    elif time_value == '3mo':
+            trends = finnhub_client.recommendation_trends(ticker)
 
-        three_month_ago_unix = now - relativedelta(months=3)
-        three_month_ago_unix = int(three_month_ago_unix.timestamp())
-        data = finnhub_client.stock_candles(ticker, 'D', three_month_ago_unix, now_unix)
+            trend_df = pd.DataFrame.from_dict(trends)
+            #trend_df = trend_df[trend_df.index == 0]
+            bar_fig = return_sentiment_bar_graph(trend_df)
 
-        df = pd.DataFrame.from_dict(data)
-        df['t'] = pd.to_datetime(df['t'], unit='s') #Convert time column from UNIX to datetime
+        elif time_value == '3mo':
 
-        stock_fig = px.line(df, x='t', y='c', template="plotly_dark",
-                            labels={'t': 'Date','c': 'Close'})
+            three_month_ago_unix = now - relativedelta(months=3)
+            three_month_ago_unix = int(three_month_ago_unix.timestamp())
+            data = finnhub_client.stock_candles(ticker, 'D', three_month_ago_unix, now_unix)
 
-        volume_fig = return_volume_graph(df)
-        stock_price = df['c'].iloc[-1]
+            df = pd.DataFrame.from_dict(data)
+            df['t'] = pd.to_datetime(df['t'], unit='s') #Convert time column from UNIX to datetime
 
-        trends = finnhub_client.recommendation_trends(ticker)
+            stock_fig = px.line(df, x='t', y='c', template="plotly_dark",
+                                labels={'t': 'Date','c': 'Close'}) #Manual axis labels
 
-        trend_df = pd.DataFrame.from_dict(trends)
-        #trend_df = trend_df[trend_df.index == 0]
-        bar_fig = return_sentiment_bar_graph(trend_df)      
+            volume_fig = return_volume_graph(df)
+            stock_price = df['c'].iloc[-1]
 
-    elif time_value == 'ytd':
+            trends = finnhub_client.recommendation_trends(ticker)
+
+            trend_df = pd.DataFrame.from_dict(trends)
+            #trend_df = trend_df[trend_df.index == 0]
+            bar_fig = return_sentiment_bar_graph(trend_df)         
+
+        elif time_value == 'ytd':
+            
+            nowDate = now.date()
+            current_year = nowDate.year
+            first_day_of_year = datetime(current_year, 1, 1).date()
+            days_since_new_year = nowDate - first_day_of_year
+
+            ytd_unix = now - relativedelta(days=days_since_new_year.days)
+            ytd_unix = int(ytd_unix.timestamp())
+
+            data = finnhub_client.stock_candles(ticker, 'D', ytd_unix, now_unix)
+
+            df = pd.DataFrame.from_dict(data)
+            df['t'] = pd.to_datetime(df['t'], unit='s') #Convert time column from UNIX to datetime
+
+            stock_fig = px.line(df, x='t', y='c', template="plotly_dark",
+                                labels={'t': 'Date','c': 'Close'}) #Manual axis labels
+
+            volume_fig = return_volume_graph(df)
+            stock_price = df['c'].iloc[-1]
+
+            trends = finnhub_client.recommendation_trends(ticker)
+
+            trend_df = pd.DataFrame.from_dict(trends)
+            #trend_df = trend_df[trend_df.index == 0]
+            bar_fig = return_sentiment_bar_graph(trend_df)      
         
-        nowDate = now.date()
-        current_year = nowDate.year
-        first_day_of_year = datetime(current_year, 1, 1).date()
-        days_since_new_year = nowDate - first_day_of_year
+        elif time_value == '1y':
 
-        ytd_unix = now - relativedelta(days=days_since_new_year.days)
-        ytd_unix = int(ytd_unix.timestamp())
+            year_ago_unix = now - relativedelta(years=1)
+            year_ago_unix = int(year_ago_unix.timestamp())
+            data = finnhub_client.stock_candles(ticker, 'D', year_ago_unix, now_unix)
 
-        data = finnhub_client.stock_candles(ticker, 'D', ytd_unix, now_unix)
+            df = pd.DataFrame.from_dict(data)
+            df['t'] = pd.to_datetime(df['t'], unit='s') #Convert time column from UNIX to datetime
 
-        df = pd.DataFrame.from_dict(data)
-        df['t'] = pd.to_datetime(df['t'], unit='s') #Convert time column from UNIX to datetime
+            stock_fig = px.line(df, x='t', y='c', template="plotly_dark",
+                                labels={'t': 'Date','c': 'Close'}) #Manual axis labels
 
-        stock_fig = px.line(df, x='t', y='c', template="plotly_dark",
-                            labels={'t': 'Date','c': 'Close'})
+            volume_fig = return_volume_graph(df)
+            stock_price = df['c'].iloc[-1]
 
-        volume_fig = return_volume_graph(df)
-        stock_price = df['c'].iloc[-1]
+            trends = finnhub_client.recommendation_trends(ticker)
 
-        trends = finnhub_client.recommendation_trends(ticker)
+            trend_df = pd.DataFrame.from_dict(trends)
+            #trend_df = trend_df[trend_df.index == 0]
+            bar_fig = return_sentiment_bar_graph(trend_df)      
 
-        trend_df = pd.DataFrame.from_dict(trends)
-        #trend_df = trend_df[trend_df.index == 0]
-        bar_fig = return_sentiment_bar_graph(trend_df)      
+        else:
+            stock_fig = pgo.Figure(data=[])
+            bar_fig = pgo.Figure(data=[])
+            volume_fig = pgo.Figure(data=[])
+            stock_price = '$Price_failed'
+        
+        stock_fig.update_yaxes(
+            tickprefix = '$',
+            tickformat = ',.2f',
+            nticks=7)
+        stock_fig.update_xaxes(
+            title = '')
+        stock_fig.update_layout(margin=dict(l=30, r=30, t=30, b=30)) # Remove white padding
+        #stock_fig.update_xaxes(ticks="outside", tickwidth=2, tickcolor='black', ticklen=10)
+
+
+        #Basic stock info (top left of layout)
+        ticker.upper() 
+        name_ticker_and_price = str(overview_json.get('Name')) + " (" + ticker + ")" + "        $" + str(stock_price)
+        stock_sector = 'Sector: ' + str(overview_json.get('Sector'))
+        stock_industry = 'Industry: ' + str(overview_json.get('Industry'))
+        stock_target_price = 'Analyst target: $' + str(overview_json.get('AnalystTargetPrice'))
     
-    elif time_value == '1y':
-
-        year_ago_unix = now - relativedelta(years=1)
-        year_ago_unix = int(year_ago_unix.timestamp())
-        data = finnhub_client.stock_candles(ticker, 'D', year_ago_unix, now_unix)
-
-        df = pd.DataFrame.from_dict(data)
-        df['t'] = pd.to_datetime(df['t'], unit='s') #Convert time column from UNIX to datetime
-
-        stock_fig = px.line(df, x='t', y='c', template="plotly_dark",
-                            labels={'t': 'Date','c': 'Close'})
-
-        volume_fig = return_volume_graph(df)
-        stock_price = df['c'].iloc[-1]
-
-        trends = finnhub_client.recommendation_trends(ticker)
-
-        trend_df = pd.DataFrame.from_dict(trends)
-        #trend_df = trend_df[trend_df.index == 0]
-        bar_fig = return_sentiment_bar_graph(trend_df)      
-
-    else:
-        stock_fig = pgo.Figure(data=[])
-        bar_fig = pgo.Figure(data=[])
-        volume_fig = pgo.Figure(data=[])
-        stock_price = '$Price_failed'
-    
-    stock_fig.update_yaxes(
-        tickprefix = '$',
-        tickformat = ',.2f',
-        nticks=7)
-    stock_fig.update_xaxes(
-        title = '')
-    stock_fig.update_layout(margin=dict(l=30, r=30, t=30, b=30)) # Remove white padding
-    #stock_fig.update_xaxes(ticks="outside", tickwidth=2, tickcolor='black', ticklen=10)
-
-
-    #Basic stock info (top left of layout)
-    ticker.upper() 
-    name_ticker_and_price = str(overview_json.get('Name')) + " (" + ticker + ")" + "        $" + str(stock_price)
-    stock_sector = 'Sector: ' + str(overview_json.get('Sector'))
-    stock_industry = 'Industry: ' + str(overview_json.get('Industry'))
-    stock_target_price = 'Analyst target: $' + str(overview_json.get('AnalystTargetPrice'))
-
-
+    except:
+        return "Error retrieving stock. Max 1 request / minute (free api)", "$$", \
+        "marketcap", "eps", "price/book", "ebitda", \
+        "p/e ratio", "peg ratio", "divyield", "beta", \
+        "chart 1", "chart 2", "chart 3" \
+        "sector", "industry", "news1", "news2", "news3", "news4"
 
     #Return these values to output, in order
     return name_ticker_and_price, stock_target_price, \

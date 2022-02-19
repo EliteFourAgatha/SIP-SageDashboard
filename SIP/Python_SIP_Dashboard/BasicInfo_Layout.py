@@ -10,17 +10,7 @@ import dash_bootstrap_components as dbc
 import dash_table as dt
 from dash.dependencies import Input, Output
 
-#Consider putting these in another file
-
-eps_Link = "https://www.forbes.com/advisor/investing/what-is-pe-price-earnings-ratio/"
-marketcap_Link = "https://www.forbes.com/advisor/investing/what-is-pe-price-earnings-ratio/"
-
-
-peRatio_Link = "https://www.forbes.com/advisor/investing/what-is-pe-price-earnings-ratio/"
-divYield_Link = "https://www.simplysafedividends.com/intelligent-income/posts/1071-dividend-yield-guide-definition-formula-examples-risks"
-peGRatio_Link = "https://www.investopedia.com/ask/answers/012715/what-considered-good-peg-price-earnings-growth-ratio.asp"
-priceToBook_Link = "https://www.businessinsider.com/what-is-price-to-book-ratio"
-beta_Link = "https://www.investopedia.com/ask/answers/102714/whats-difference-between-alpha-and-beta.asp"
+from Metric_Links import *
 
 # Basic info card
 def return_basic_info_card():
@@ -42,16 +32,6 @@ def return_basic_info_card():
                             dbc.Col(
                                 html.H6(id="stock-analyst-price"))
                     ),
-                    #dbc.Row(
-                    #    [
-                    #        dbc.Col(
-                    #            html.H6(id="52-week-high", style={'color: green'})
-                    #        ),
-                    #        dbc.Col(
-                    #            html.H6(id="52-week-low", style={'color: red'})
-                    #        ),
-                    #    ]
-                    #),
                     dbc.Row(
                             dbc.Col(
                                 html.H6(id="stock-sector"))
@@ -75,22 +55,22 @@ def return_marketcap_with_hover():
             dbc.Col([
                 html.P([
                         html.A(
-                            "PEG Ratio: ",
-                            id="peg-ratio-anchor",
-                            href=peGRatio_Link,
+                            "Market Cap: ",
+                            id="market-cap-anchor",
+                            href=marketcap_Link,
                             target="_blank",
                             style={"textDecoration": "underline", "cursor": "pointer", "text-align": "left"},
                         )
                 ]), #End html.P
             dbc.Tooltip(
-            "Basic explanation of peg goes here",
-            target="peg-ratio-anchor"
+            "Basic explanation of market cap goes here",
+            target="market-cap-anchor"
                 )
             ], className="col-md-5",), #End dbc.Col
             dbc.Col([
                 html.P(
                     "",
-                    id="peg-ratio-test",
+                    id="market-cap",
                     style={'color': 'white', 'fontSize': '16', 'text-align':'left'})
             ], className="col-md-1")
         ]) #End dbc.Row
@@ -103,22 +83,22 @@ def return_eps_with_hover():
             dbc.Col([
                 html.P([
                         html.A(
-                            "PEG Ratio: ",
-                            id="peg-ratio-anchor",
-                            href=peGRatio_Link,
+                            "EPS: ",
+                            id="eps-anchor",
+                            href=eps_Link,
                             target="_blank",
                             style={"textDecoration": "underline", "cursor": "pointer", "text-align": "left"},
                         )
                 ]), #End html.P
             dbc.Tooltip(
-            "Basic explanation of peg goes here",
-            target="peg-ratio-anchor"
+            "Basic explanation of EPS goes here",
+            target="eps-anchor"
                 )
             ], className="col-md-5",), #End dbc.Col
             dbc.Col([
                 html.P(
                     "",
-                    id="peg-ratio-test",
+                    id="eps",
                     style={'color': 'white', 'fontSize': '16', 'text-align':'left'})
             ], className="col-md-1")
         ]) #End dbc.Row
@@ -146,7 +126,7 @@ def return_ebitda_with_hover():
             dbc.Col([
                 html.P(
                     "",
-                    id="ebitda-test",
+                    id="ebitda",
                     style={'color': 'white', 'fontSize': '16', 'text-align':'left'})
             ], className="col-md-1")
         ]) #End dbc.Row
@@ -174,7 +154,7 @@ def return_peRatio_with_hover():
             dbc.Col([
                 html.P(
                     "",
-                    id="pe-ratio-test",
+                    id="pe-ratio",
                     style={'color': 'white', 'fontSize': '16', 'text-align':'left'})
             ], className="col-md-1")
         ]) #End dbc.Row
@@ -202,7 +182,7 @@ def return_peGRatio_with_hover():
             dbc.Col([
                 html.P(
                     "",
-                    id="peg-ratio-test",
+                    id="peg-ratio",
                     style={'color': 'white', 'fontSize': '16', 'text-align':'left'})
             ], className="col-md-1")
         ]) #End dbc.Row
@@ -230,7 +210,7 @@ def return_divYield_with_hover():
             dbc.Col([
                 html.P(
                     "",
-                    id="div-yield-test",
+                    id="div-yield",
                     style={'color': 'white', 'fontSize': '16', 'text-align':'left'})
             ], className="col-md-1")
         ]) #End dbc.Row
@@ -257,7 +237,7 @@ def return_price_to_book_with_hover():
             dbc.Col([
                 html.P(
                     "",
-                    id="price-book-test",
+                    id="price-book",
                     style={'color': 'white', 'fontSize': '16', 'text-align':'left'})
             ], className="col-md-1")
         ]) #End dbc.Row
@@ -285,7 +265,7 @@ def return_beta_with_hover():
             dbc.Col([
                 html.P(
                     "",
-                    id="beta-test",
+                    id="beta",
                     style={'color': 'white', 'fontSize': '16', 'text-align':'left'})
             ], className="col-md-1")
         ]) #End dbc.Row
@@ -295,19 +275,19 @@ def return_beta_with_hover():
 # End metric cards
 
 # News cards
-def return_news_card(image_source_url, news_title, news_description, news_url):
+def return_empty_news_card():
 
     card = dbc.CardGroup(
         [
             dbc.Card(
-                html.Img(src=image_source_url, alt="Picture failed to load.."), #URL Image
+                html.Img(alt="Picture failed to load.."), #URL Image
             ),
             dbc.Card(
                 dbc.CardBody(
                     [
-                        html.A(news_title, href=news_url, target="_blank",
-                        style={'font-size':'16'}), #Card title (url hyperlink)
-                        html.P(news_description,
+                        html.P("article headline",
+                        style={'font-size':'16'}),
+                        html.P("article description",
                         style={'font-size':'14'})
                     ]
                 )

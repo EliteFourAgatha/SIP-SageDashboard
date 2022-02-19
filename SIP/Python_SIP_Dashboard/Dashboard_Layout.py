@@ -31,17 +31,6 @@ def return_input_bar():
                 ]),
             ])
         
-# Generate candlestick graph
-# Can change this to a line plot later not that much different
-def return_candlestick(dataFrame):
-    data = []
-    data.append(pgo.Candlestick(x=dataFrame['Date'], open=dataFrame['Open'],
-                                high=dataFrame['High'], low=dataFrame['Low'],
-                                close=dataFrame['Close']))
-    layout = {'xaxis':{'title':'Date', 'rangeslider':{'visible': False}},
-                'yaxis':{'title':'Price'}, 'hovermode': True}
-    return{'data': data, 'layout': layout}
-
 # Returns time interval radio buttons for date range
 def return_timeinterval():
     layout = html.Div(
@@ -75,7 +64,7 @@ def return_sentiment_bar_graph(dataFrame):
         title_x = 0.5,
         title_font_size = 16
     )
-    figure.update_xaxes(
+    figure.update_yaxes(
         title= ''
     )
     return figure
@@ -89,7 +78,7 @@ def return_volume_graph(dataFrame):
                 mode='markers',
                 marker=dict(
                     size= 0.000001 * dataFrame['v'], 
-                    sizemin= 10,
+                    sizemin= 8,
                     color= dataFrame['v'], 
                     colorscale= [[0, 'red'], [1, 'green']],
                     showscale= True)
@@ -104,11 +93,7 @@ def return_volume_graph(dataFrame):
         margin=dict(l=30, r=30, t=30, b=30),
         template= "plotly_dark",
         title_x= 0.5,
-        title_font_size = 20,
-
-        #format for $1.20 notation, not needed here
-        #yaxis_tickprefix = '$',
-        #yaxis_tickformat = ',.2f'
+        title_font_size = 20
     )
     figure.update_yaxes(
         title=''

@@ -1,12 +1,7 @@
-import matplotlib.pyplot as plt
 import pandas as pd
-import numpy as np
-from alpha_vantage.timeseries import TimeSeries
 import matplotlib.pyplot as plt
-import dash
 import dash_core_components as dcc
 import dash_html_components as html
-import dash_table as dt
 import dash_bootstrap_components as dbc
 from dash.dependencies import Input, Output, State
 import plotly.graph_objects as pgo
@@ -31,9 +26,8 @@ import plotly.express as px
 import datetime
 import mplfinance
 
-from Card_Layout import *
+from BasicInfo_Layout import *
 from Dashboard_Layout import *
-from Stock_Functions import *
 from Keys1 import *
 
 api_key = "BPE6KMKXLWCGGQW1"

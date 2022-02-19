@@ -20,7 +20,7 @@ import datetime
 import time
 from dateutil.relativedelta import relativedelta
 
-from Card_Layout import *
+from BasicInfo_Layout import *
 from Dashboard_Layout import *
 from Stock_Functions import *
 from Keys1 import *
