@@ -1,4 +1,5 @@
 import pandas as pd
+import numpy as np
 import matplotlib.pyplot as plt
 import dash_core_components as dcc
 import dash_html_components as html
@@ -46,15 +47,36 @@ first_day_of_year = datetime(current_year, 1, 1).date()
 days_since_new_year = now - first_day_of_year
 print(days_since_new_year.days)
 
-
-# dd/mm/YY
-dt_string = now.strftime("%d/%m/%Y")
-print("date and time =", dt_string)
-
 finnhub_client = finnhub.Client(api_key=finnhub_api_key)
 
 trends = finnhub_client.recommendation_trends('AAPL')
 trend_df = pd.DataFrame.from_dict(trends)
 
+buy = [trend_df['buy'][0]]
+sell = [trend_df['sell'][0]]
+hold = [trend_df['hold'][0]]
+strongBuy = [trend_df['strongBuy'][0]]
+strongSell = [trend_df['strongSell'][0]]
+
+#d = {'Sentiment score': [buy, sell, hold, strongBuy, strongSell]}
+#index = ['Buy', 'Sell', 'Hold', 'Strong Buy', 'Strong Sell']
+df = pd.DataFrame(np.empty((0, 5)))
+#df['Buy'] = buy
+#df['Sell'] = sell
+#df['Hold'] = hold
+#df['Strong Buy'] = strongBuy
+#df['Strong Sell'] = strongSell
+df.columns = [['Buy', 'Sell', 'Hold', 'Strong Buy', 'Strong Sell']]
+df.loc[0] = [buy, sell, hold, strongBuy, strongSell]
+
+data_dict = {'Buy': buy, 'Sell': sell, 'Hold': hold, 'Strong Buy': strongBuy, 'Strong Sell': strongSell}
+columns = list(data_dict.keys())
+values = list(data_dict.values())
+
 #print(trend_df['buy'][0])
-print(trend_df)
+#print(df)
+print(columns[1])
+print(columns[2])
+print(values)
+print(values[1])
+print(values[2])

@@ -20,3 +20,31 @@ def return_candlestick(dataFrame):
     layout = {'xaxis':{'title':'Date', 'rangeslider':{'visible': False}},
                 'yaxis':{'title':'Price'}, 'hovermode': True}
     return{'data': data, 'layout': layout}
+
+def return_industry_dict(ticker, sector, industry):
+    exchange = 'NYSE'
+    marketcapmorethan = '1000000000'
+    number_of_companies = 10
+    #{} is empty dict
+    symbols = {}
+    keys = []
+    values = []
+
+    screener = requests.get(f'https://financialmodelingprep.com/api/v3/stock-screener?sector={sector}&industry={industry}&exchange={exchange}&limit={number_of_companies}&apikey={finprep_api_key}').json()
+    #append screener[i] values to lists
+    for item in screener:
+        keys.append(item['symbol'])
+        values.append(item['beta'])
+    
+    [float (i) for i in values]
+
+    #Add all key/value pairs into dictionary
+    for i in range(len(keys)):
+        symbols[keys[i]] = values[i]
+        # If chosen stock in list, remove
+        if keys[i] == ticker:
+            del symbols[i]
+    
+    final_dict = {'symbols': keys, 'betas': values}
+    
+    return final_dict

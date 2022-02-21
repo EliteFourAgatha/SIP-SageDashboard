@@ -1,3 +1,4 @@
+from cgitb import strong
 from enum import auto
 from tkinter import Y
 import pandas as pd
@@ -47,26 +48,43 @@ def return_timeinterval():
     return layout
 
 def return_sentiment_bar_graph(dataFrame):
-    figure = px.bar(dataFrame,
-            # Try doing x = dataFrame.column[0] or something. have x be equal to name of each column?
+    buy = [dataFrame['buy'][0]]
+    sell = [dataFrame['sell'][0]]
+    hold = [dataFrame['hold'][0]]
+    strongBuy = [dataFrame['strongBuy'][0]]
+    strongSell = [dataFrame['strongSell'][0]]
 
+    d = {'Sentiment Score': [buy, sell, hold, strongBuy, strongSell]}
+    index = ['Buy', 'Sell', 'Hold', 'Strong Buy', 'Strong Sell']
+    df23 = pd.DataFrame(data=d, index=index)
+    #df.fillna(0)
 
-            x=[dataFrame['buy'][0], dataFrame['hold'][0], dataFrame['sell'][0], dataFrame['strongBuy'][0], dataFrame['strongSell']],
-            y=[dataFrame.iat[0, 0], dataFrame.iat[0,1], dataFrame.iat[0, 3], dataFrame.iat[0, 4], dataFrame.iat[0, 5]],
-            #y= [c for c in dataFrame.columns],
-            title="Analyst Sentiment",
-            #color=dataFrame
-        )
-    figure.update_layout(
-        #Set graph margins, remove white padding
-        margin=dict(l=30, r=30, t=30, b=30),
-        template= "plotly_dark",
-        title_x = 0.5,
-        title_font_size = 16
-    )
-    figure.update_yaxes(
-        title= ''
-    )
+    data_dict = {'Buy': buy, 'Sell': sell, 'Hold': hold, 'Strong Buy': strongBuy, 'Strong Sell': strongSell}
+    columns = list(data_dict.keys())
+    values = list(data_dict.values())
+
+    #df = pd.DataFrame({"x": ['Buy', 'Sell', 'Hold', 'Strong Buy', 'Strong Sell'], "Buy": [buy],
+    #"Sell": [sell], "Hold": [hold], "Strong Buy": [strongBuy], "Strong Sell": [strongSell]})
+    data = [pgo.Bar(
+        x = columns,
+        y = values
+    )]
+    figure = pgo.Figure(data=data)
+    #figure = px.bar(df,
+    #        x = "x",
+    #        y = ['Buy', 'Sell', 'Hold', 'Strong Buy', 'Strong Sell'],
+    #        
+    #        #y= [c for c in dataFrame.columns],
+    #        title="Analyst Sentiment",
+    #        #color=dataFrame
+    #    )
+    #figure.update_layout(
+    #    #Set graph margins, remove white padding
+    #    margin=dict(l=30, r=30, t=30, b=30),
+    #    template= "plotly_dark",
+    #    title_x = 0.5,
+    #    title_font_size = 16)
+    #figure.update_yaxes(title= '')
     return figure
 
 def return_volume_graph(dataFrame):
@@ -93,41 +111,7 @@ def return_volume_graph(dataFrame):
         margin=dict(l=30, r=30, t=30, b=30),
         template= "plotly_dark",
         title_x= 0.5,
-        title_font_size = 20
-    )
-    figure.update_yaxes(
-        title=''
-    )
-    figure.update_xaxes(
-        title=''
-    )
+        title_font_size = 20)
+    figure.update_yaxes(title= '')
+    figure.update_xaxes(title= '')
     return figure
-
-
-def return_industry_dict(ticker, sector, industry):
-    exchange = 'NYSE'
-    marketcapmorethan = '1000000000'
-    number_of_companies = 10
-    #{} is empty dict
-    symbols = {}
-    keys = []
-    values = []
-
-    screener = requests.get(f'https://financialmodelingprep.com/api/v3/stock-screener?sector={sector}&industry={industry}&exchange={exchange}&limit={number_of_companies}&apikey={finprep_api_key}').json()
-    #append screener[i] values to lists
-    for item in screener:
-        keys.append(item['symbol'])
-        values.append(item['beta'])
-    
-    [float (i) for i in values]
-
-    #Add all key/value pairs into dictionary
-    for i in range(len(keys)):
-        symbols[keys[i]] = values[i]
-        # If chosen stock in list, remove
-        if keys[i] == ticker:
-            del symbols[i]
-    
-    final_dict = {'symbols': keys, 'betas': values}
-    
-    return final_dict
