@@ -169,7 +169,7 @@ def return_dashboard(n_clicks, time_value, ticker):
 
     stock_market_cap = overview_json.get('MarketCapitalization')
     stock_market_cap = int(stock_market_cap)
-    stock_market_cap = '{:,}'.format(stock_market_cap)
+    stock_market_cap = '${:,}'.format(stock_market_cap)
     stock_eps = overview_json.get('EPS')
     #stock_eps = int(stock_eps)
     #stock_eps = '${:,}'.format(stock_eps)
@@ -179,8 +179,8 @@ def return_dashboard(n_clicks, time_value, ticker):
     stock_div_yield = float(stock_div_yield)
     stock_div_yield = '{:.1%}'.format(stock_div_yield)
     stock_ebitda = overview_json.get('EBITDA')
-    #stock_ebitda = int(stock_ebitda)
-    #stock_ebitda = '${:,}'.format(stock_ebitda)
+    stock_ebitda = int(stock_ebitda)
+    stock_ebitda = '${:,}'.format(stock_ebitda)
     stock_priceBookRatio = overview_json.get('PriceToBookRatio')
     stock_beta = overview_json.get('Beta')
 
@@ -216,7 +216,7 @@ def return_dashboard(n_clicks, time_value, ticker):
         df['t'] = pd.to_datetime(df['t'], unit='s')#Convert time column from UNIX to datetime
 
         stock_fig = px.line(df, x='t', y='c', template="plotly_dark",
-                            labels={'t': 'Date','c': 'Close'}) #Manual axis labels
+                            labels={'t': 'Date', 'c': 'Close'}) #Manual axis labels
 
         volume_fig = return_volume_graph(df)
         stock_price = df['c'].iloc[-1] 
@@ -231,7 +231,7 @@ def return_dashboard(n_clicks, time_value, ticker):
         df['t'] = pd.to_datetime(df['t'], unit='s') #Convert time column from UNIX to datetime
 
         stock_fig = px.line(df, x='t', y='c', template="plotly_dark",
-                            labels={'t': 'Date','c': 'Close'}) #Manual axis labels
+                            labels={'t': 'Date', 'c': 'Close'}) #Manual axis labels
 
         volume_fig = return_volume_graph(df)
         stock_price = df['c'].iloc[-1]
@@ -246,7 +246,7 @@ def return_dashboard(n_clicks, time_value, ticker):
         df['t'] = pd.to_datetime(df['t'], unit='s') #Convert time column from UNIX to datetime
 
         stock_fig = px.line(df, x='t', y='c', template="plotly_dark",
-                            labels={'t': 'Date','c': 'Close'}) #Manual axis labels
+                            labels={'t': 'Date', 'c': 'Close'}) #Manual axis labels
 
         volume_fig = return_volume_graph(df)
         stock_price = df['c'].iloc[-1]
@@ -267,7 +267,7 @@ def return_dashboard(n_clicks, time_value, ticker):
         df['t'] = pd.to_datetime(df['t'], unit='s') #Convert time column from UNIX to datetime
 
         stock_fig = px.line(df, x='t', y='c', template="plotly_dark",
-                            labels={'t': 'Date','c': 'Close'}) #Manual axis labels
+                            labels={'t': 'Date', 'c': 'Close'}) #Manual axis labels
 
         volume_fig = return_volume_graph(df)
         stock_price = df['c'].iloc[-1]     
@@ -282,7 +282,7 @@ def return_dashboard(n_clicks, time_value, ticker):
         df['t'] = pd.to_datetime(df['t'], unit='s') #Convert time column from UNIX to datetime
 
         stock_fig = px.line(df, x='t', y='c', template="plotly_dark",
-                            labels={'t': 'Date','c': 'Close'}) #Manual axis labels
+                            labels={'t': 'Date', 'c': 'Close'}) #Manual axis labels
 
         volume_fig = return_volume_graph(df)
         stock_price = df['c'].iloc[-1]
