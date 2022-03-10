@@ -63,7 +63,7 @@ def return_marketcap_with_hover():
                         )
                 ]), #End html.P
             dbc.Tooltip(
-            "Basic explanation of market cap goes here",
+            "Total value of company's stock. Number of shares * price",
             target="market-cap-anchor"
                 )
             ], className="col-md-5",), #End dbc.Col
@@ -91,7 +91,7 @@ def return_eps_with_hover():
                         )
                 ]), #End html.P
             dbc.Tooltip(
-            "Basic explanation of EPS goes here",
+            "Indicator of profitability. Company profit / number of shares",
             target="eps-anchor"
                 )
             ], className="col-md-5",), #End dbc.Col
@@ -119,7 +119,7 @@ def return_ebitda_with_hover():
                         )
                 ]), #End html.P
             dbc.Tooltip(
-            "Basic explanation of ebitda goes here",
+            "Net income + (I)nterest, (T)axes, (D)epreciation, and (A)mortization",
             target="ebitda-ratio-anchor"
                 )
             ], className="col-md-5",), #End dbc.Col
@@ -147,7 +147,7 @@ def return_peRatio_with_hover():
                         )
                 ]), #End html.P
             dbc.Tooltip(
-            "Basic explanation of pe goes here",
+            "Relative value of shares. Price / Earnings per share",
             target="pe-ratio-anchor"
                 )
             ], className="col-md-5",), #End dbc.Col
@@ -175,7 +175,7 @@ def return_peGRatio_with_hover():
                         )
                 ]), #End html.P
             dbc.Tooltip(
-            "Basic explanation of peg goes here",
+            "Determine value while considering growth. P/E ratio / Growth in earnings",
             target="peg-ratio-anchor"
                 )
             ], className="col-md-5",), #End dbc.Col
@@ -203,7 +203,7 @@ def return_divYield_with_hover():
                         )
                 ]), #End html.P
             dbc.Tooltip(
-            "Basic explanation of div yield goes here",
+            "Dividends paid per share (annually) / share price. Displayed as %.",
             target="div-yield-ratio-anchor"
                 )
             ], className="col-md-5",), #End dbc.Col
@@ -230,7 +230,7 @@ def return_price_to_book_with_hover():
                         )
                 ]), #End html.P
             dbc.Tooltip(
-            "Basic explanation of price to book goes here",
+            "Compares market cap to book value (net assets) of company",
             target="price-book-ratio-anchor"
                 )
             ], className="col-md-5",), #End dbc.Col
@@ -258,7 +258,7 @@ def return_beta_with_hover():
                         )
                 ]), #End html.P
             dbc.Tooltip(
-            "Basic explanation of beta goes here",
+            "Compares volatility to index (1). Greater than 1, more volatile, and vice versa",
             target="beta-anchor"
                 )
             ], className="col-md-5",), #End dbc.Col

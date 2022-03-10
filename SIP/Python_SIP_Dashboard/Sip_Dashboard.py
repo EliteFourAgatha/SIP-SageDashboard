@@ -270,7 +270,7 @@ def return_dashboard(n_clicks, time_value, ticker):
                             labels={'t': 'Date', 'c': 'Close'}) #Manual axis labels
 
         volume_fig = return_volume_graph(df)
-        stock_price = df['c'].iloc[-1]     
+        stock_price = df['c'].iloc[-1]
     
     elif time_value == '1y':
 
