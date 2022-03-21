@@ -90,7 +90,8 @@ def return_sentiment_bar_graph(dataFrame):
         y = values
     )]
     figure = pgo.Figure(
-        data=data)
+        data=data,
+        title="Analyst Sentiment")
     #figure = px.bar(df,
     #        x = "x",
     #        y = ['Buy', 'Sell', 'Hold', 'Strong Buy', 'Strong Sell'],

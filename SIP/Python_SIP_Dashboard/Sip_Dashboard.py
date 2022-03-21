@@ -306,7 +306,6 @@ def return_dashboard(n_clicks, time_value, ticker):
     stock_fig.update_xaxes(
         title = '')
     stock_fig.update_layout(margin=dict(l=30, r=30, t=30, b=30)) # Remove white padding
-    #stock_fig.update_xaxes(ticks="outside", tickwidth=2, tickcolor='black', ticklen=10)
 
     trends = finnhub_client.recommendation_trends(ticker)
 
