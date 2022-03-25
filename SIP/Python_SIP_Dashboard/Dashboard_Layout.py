@@ -1,21 +1,11 @@
-from cgitb import strong
-from enum import auto
-from tkinter import Y
-import pandas as pd
-import numpy as np
-import requests
-from datetime import datetime
 import plotly.graph_objects as pgo
-import plotly.express as px
 import dash_core_components as dcc
 import dash_html_components as html
 import dash_bootstrap_components as dbc
-import dash_table as dt
-from dash.dependencies import Input, Output
 
-finprep_api_key = "1882bbe25d0a9a496ee5a1e20433c3a4"
+from Keys1 import *
 
-# Generate basic display, also includes search bar + button
+# Generate basic display, includes search bar + button
 def return_input_bar():
     return html.Div([
         dbc.Row([
@@ -55,22 +45,6 @@ def return_sentiment_bar_graph(dataFrame):
     strongBuy = [dataFrame['strongBuy'][0]]
     strongSell = [dataFrame['strongSell'][0]]
 
-    # Add this to list of errors made / things to look out for personally
-    #  while coding. Could also add to list of "weaknesses" for job interview.
-    #   Tend to get stuck, tutorials working but code isn't, problem is user error (myself).
-    #    Spent too long trying different methods, should have started at beginning (check types, function parameters, etc.)
-    #  I spent hours trying different methods and all tutorials
-    #   seemed to not be working. The problem was that I was trying to use these objects above,
-    #    which seemed to make sense, but they were returned as list objects, not strings / ints. 
-    #     So when I went to try to use them to chart, gave all sorts of weird errors that didn't make it obvious.
-    #     Simply getting the first element of these lists (below) solved the problem
-    #     
-    # Moral of story: if stuck, start back at beginning. What am I trying to do? Plot numbers on
-    #  bar chart. Bar chart either not working or giving weird output? Check your variables. Make sure they are
-    #   all the right type. Make sure the function you are feeding (px.bar or pgo.bar)
-    #    is getting correct type of input
-
-
     # Get first (and only) list element
     buy = (buy[0])
     sell = (sell[0])
@@ -83,8 +57,6 @@ def return_sentiment_bar_graph(dataFrame):
     values = list(data_dict.values())
     bar_colors = ('limegreen', 'indianred', 'gray', 'darkgreen', 'maroon')
 
-    #df = pd.DataFrame({"x": ['Buy', 'Sell', 'Hold', 'Strong Buy', 'Strong Sell'], "Buy": [buy],
-    #"Sell": [sell], "Hold": [hold], "Strong Buy": [strongBuy], "Strong Sell": [strongSell]})
     data = [pgo.Bar(
         x = columns,
         y = values
@@ -92,14 +64,6 @@ def return_sentiment_bar_graph(dataFrame):
     figure = pgo.Figure(
         data=data,
         title="Analyst Sentiment")
-    #figure = px.bar(df,
-    #        x = "x",
-    #        y = ['Buy', 'Sell', 'Hold', 'Strong Buy', 'Strong Sell'],
-    #        
-    #        #y= [c for c in dataFrame.columns],
-    #        title="Analyst Sentiment",
-    #        #color=dataFrame
-    #    )
     figure.update_layout(
         #Set graph margins, remove white padding
         margin=dict(l=30, r=30, t=30, b=30),

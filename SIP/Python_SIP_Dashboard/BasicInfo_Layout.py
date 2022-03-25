@@ -1,14 +1,5 @@
-from enum import auto
-import pandas as pd
-import numpy as np
-import requests
-from datetime import datetime
-import plotly.graph_objects as pgo
-import dash_core_components as dcc
 import dash_html_components as html
 import dash_bootstrap_components as dbc
-import dash_table as dt
-from dash.dependencies import Input, Output
 
 from Metric_Links import *
 
@@ -119,7 +110,7 @@ def return_ebitda_with_hover():
                         )
                 ]), #End html.P
             dbc.Tooltip(
-            "Net income + (I)nterest, (T)axes, (D)epreciation, and (A)mortization",
+            "Earnings before (I)nterest, (T)axes, (D)epreciation, and (A)mortization",
             target="ebitda-ratio-anchor"
                 )
             ], className="col-md-5",), #End dbc.Col
@@ -216,6 +207,7 @@ def return_divYield_with_hover():
         ]) #End dbc.Row
     ]) #End html.Div
     return div
+
 def return_price_to_book_with_hover():
     div = html.Div([
         dbc.Row([
@@ -274,30 +266,8 @@ def return_beta_with_hover():
 
 # End metric cards
 
-# News cards
-def return_empty_news_card():
-
-    card = dbc.CardGroup(
-        [
-            dbc.Card(
-                html.Img(alt="Picture failed to load.."), #URL Image
-            ),
-            dbc.Card(
-                dbc.CardBody(
-                    [
-                        html.P("article headline",
-                        style={'font-size':'16'}),
-                        html.P("article description",
-                        style={'font-size':'14'})
-                    ]
-                )
-            )
-        ]
-    )
-
-    return card
-    
-def return_news_card_test(news_title, news_description, news_url, image_source_url):
+# News cards    
+def return_news_card(news_title, news_description, news_url, image_source_url):
 
     card = dbc.Card(
     [
@@ -306,13 +276,13 @@ def return_news_card_test(news_title, news_description, news_url, image_source_u
                 dbc.Col(
                     [
                         html.A(news_title, href=news_url, target="_blank",
-                        style={'font-size':'16', 'text-align':'center'}), #Card title (url hyperlink)
+                        style={'font-size':'16', 'text-align':'center'}),
                         dbc.CardImg(
                         src=image_source_url,
                         style={'text-align':'center'}
                         )
                     ],
-                    className="col-md-4",
+                    className="col-md-4"
                 ),
                 dbc.Col(
                     dbc.CardBody(
@@ -322,14 +292,13 @@ def return_news_card_test(news_title, news_description, news_url, image_source_u
                             )
                         ]
                     ),
-                    className="col-md-8",
+                    className="col-md-8"
                 ),
             ],
-            className="g-0 d-flex align-items-center",
+            className="g-0 d-flex align-items-center"
         )
     ],
-    className="mb-3",
-    #style={"maxWidth": "540px"},
+    className="mb-3"
     )
 
     return card

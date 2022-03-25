@@ -73,7 +73,6 @@ app.layout = html.Div(
                     [
                         dcc.Graph(id='bar-graph',
                             config={'displayModeBar': False}),
-
                     ], 
                     width=6), #End col
                 dbc.Col(
@@ -120,9 +119,9 @@ app.layout = html.Div(
                 Output('news-card-two', 'children'), 
                 Output('news-card-three', 'children'),
                 Output('news-card-four', 'children'),
-                [Input('ticker-input-button', 'n_clicks')], #Input button fires callback
-                [State('time-interval-radio', 'value')], #Take radio value state
-                [State('ticker-input-searchbar', 'value')], #Take input searchbar state
+                [Input('ticker-input-button', 'n_clicks')], # Input button fires callback
+                [State('time-interval-radio', 'value')], # Take radio value state
+                [State('ticker-input-searchbar', 'value')], # Take input searchbar state
                 prevent_initial_call = True)
 
 # Function is called whenever ANY included inputs are changed
@@ -154,15 +153,13 @@ def return_dashboard(n_clicks, time_value, ticker):
         artFour_url = news_dict['articles'][3]['url']
         artFour_urlImage = news_dict['articles'][3]['urlToImage']
 
-        news_card_one = return_news_card_test(artOne_title, artOne_desc, artOne_url, artOne_urlImage)
-        news_card_two = return_news_card_test(artTwo_title, artTwo_desc, artTwo_url, artTwo_urlImage)
-        news_card_three = return_news_card_test(artThree_title, artThree_desc, artThree_url, artThree_urlImage)
-        news_card_four = return_news_card_test(artFour_title, artFour_desc, artFour_url, artFour_urlImage)
+        news_card_one = return_news_card(artOne_title, artOne_desc, artOne_url, artOne_urlImage)
+        news_card_two = return_news_card(artTwo_title, artTwo_desc, artTwo_url, artTwo_urlImage)
+        news_card_three = return_news_card(artThree_title, artThree_desc, artThree_url, artThree_urlImage)
+        news_card_four = return_news_card(artFour_title, artFour_desc, artFour_url, artFour_urlImage)
     except:
         return "news test1", "news test2", "news test3", "news test4"
-        # Explained Metrics
 
-    #try:
     overview_response = requests.get(api_url + "OVERVIEW&symbol=" + ticker + "&apikey=" + api_key)
     overview_json = overview_response.json()
 
@@ -171,8 +168,6 @@ def return_dashboard(n_clicks, time_value, ticker):
     stock_market_cap = int(stock_market_cap)
     stock_market_cap = '${:,}'.format(stock_market_cap)
     stock_eps = overview_json.get('EPS')
-    #stock_eps = int(stock_eps)
-    #stock_eps = '${:,}'.format(stock_eps)
     stock_pe_ratio = overview_json.get('PERatio')
     stock_peg_ratio = overview_json.get('PEGRatio')
     stock_div_yield = overview_json.get('DividendYield')
